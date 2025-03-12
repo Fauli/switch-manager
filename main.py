@@ -2,6 +2,7 @@ import asyncio
 import csv
 import os
 import subprocess
+import logging
 from pathlib import Path
 from textual.app import App, ComposeResult
 from textual.widgets import Static, DataTable, Input
@@ -10,6 +11,8 @@ from textual import events
 from textual.timer import Timer
 from textual.screen import Screen
 from textual.scroll_view import ScrollView
+
+logging.basicConfig(filename="textual.log", level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
 class StreamingOutputScreen(Screen):
     """A modal screen that streams command output as it is produced."""
@@ -50,8 +53,7 @@ class StreamingOutputScreen(Screen):
         # Wait a bit and restore focus to the main DataTable.
         await asyncio.sleep(0.3)
         try:
-            self.app.set_focus(self.app.query_one(SwitchManagerApp))
-            #self.app.set_focus(self.app.query_one(DataTable))
+            self.app.set_focus(self.app.query_one(DataTable))
         except Exception as e:
             self.app.log(f"Focus restoration error (streaming): {e}")
 
@@ -177,7 +179,11 @@ class SwitchManagerApp(App):
             self.exit()
         elif command == "ssh":
             self.exit()
+            os.system("clear")  # Clear the terminal screen
             os.system(f"ssh {ip}")
+           # self.exit()  # exit the TUI first
+           # import pty
+           # pty.spawn(["ssh", ip])
         elif command == "ping":
             await self.push_screen(StreamingOutputScreen(["ping", "-c", "4", ip]))
         elif command == "traceroute":
@@ -227,6 +233,14 @@ class SwitchManagerApp(App):
                     search_text in row.get("comment", row.get("Comment", "")).lower())
             ]
         self.update_table(self.filtered_data)
+
+    async def pop_screen(self) -> None:
+        await super().pop_screen()
+        # Immediately restore focus to the DataTable after a modal is popped.
+        try:
+            self.set_focus(self.query_one(DataTable))
+        except Exception as e:
+            self.log(f"Error restoring focus: {e}")
 
 if __name__ == "__main__":
     app = SwitchManagerApp(csv_path="data.csv")
