@@ -2,8 +2,8 @@
 
 Screen {
     background: #1e1e1e;
-    color: #c5c8c6;
-    overflow: hidden; /* Prevent scrollbars */
+    /*color: #c5c8c6; */
+    overflow: hidden;
 }
 
 #title {
@@ -15,23 +15,21 @@ Screen {
     margin: 1 0;
 }
 
-/* The main container fills the screen and hides overflow */
 #main_container {
     height: 100%;
     width: 100%;
     overflow: hidden;
 }
 
-/* Command bar is given a fixed height so it doesn’t take too much space */
 #command_bar {
+    align: center middle;
     background: #333333;
-    height: 3;      /* 3 lines high */
+    height: 3;
     min-height: 3;
     max-height: 3;
     padding: 0 1;
 }
 
-/* Commands use a smaller padding to fit in the limited height */
 .command {
     padding: 0 1;
     margin: 0 1;
@@ -44,29 +42,34 @@ Screen {
     text-style: bold underline;
 }
 
-/* Search input styling remains the same */
-#search_input {
-    margin: 1;
-    padding: 1;
-    border: heavy #555555;
-    color: #c5c8c6;
-    background: #2e2e2e;
+Input {
+    color: #c5c8c6 !important;
+    background: #2e2e2e !important;
 }
 
-/* Let the data table take the remaining available space */
+/* Force visible text in the search input using !important */
+#search_input {
+    margin: 1;
+    border: heavy #555555;
+    color: #c5c8c6 !important;
+    opacity: 1 !important;
+}
+
+#search_input * {
+    color: #c5c8c6 !important;
+}
+
 #data_table {
     margin: 1;
     border: heavy #555555;
-    /* Height is auto so it fills available space */
     height: auto;
 }
 
-/* Status bar at the bottom with a fixed small height */
 .status {
     background: #444444;
     color: white;
     text-align: center;
-    height: 1;      /* 1 line high */
+    height: 1;
     min-height: 1;
     max-height: 1;
     padding: 0 1;

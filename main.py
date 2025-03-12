@@ -7,7 +7,7 @@ from textual import events
 from textual.timer import Timer
 
 class SwitchManagerApp(App):
-    CSS_PATH = "switch_manager.css"  # Place this file in the same directory.
+    CSS_PATH = "switch_manager.css"  # Make sure this file is in the same directory.
     BINDINGS = [
         ("up", "move_up", "Move Up"),
         ("down", "move_down", "Move Down"),
@@ -29,6 +29,7 @@ class SwitchManagerApp(App):
                 for i, cmd in enumerate(self.commands):
                     css_class = "command active" if i == self.active_command_index else "command"
                     yield Static(cmd, id=f"cmd-{i}", classes=css_class)
+            # Remove inline style; styling is done via CSS.
             yield Input(placeholder="Search...", id="search_input")
             yield DataTable(id="data_table")
             yield Static("", id="status", classes="status")
@@ -82,12 +83,12 @@ class SwitchManagerApp(App):
     async def action_move_up(self) -> None:
         table = self.query_one(DataTable)
         if table.row_count > 0:
-            await table.action_cursor_up()
+            table.action_cursor_up()
     
     async def action_move_down(self) -> None:
         table = self.query_one(DataTable)
         if table.row_count > 0:
-            await table.action_cursor_down()
+            table.action_cursor_down()
     
     def action_execute_command(self) -> None:
         table = self.query_one(DataTable)
@@ -127,12 +128,14 @@ class SwitchManagerApp(App):
             event.stop()
             return
         
-        # For printable keys (other than left/right and enter), if the search input is not focused, focus it.
+        # For any printable key (other than left/right and enter), if search input is not focused, focus it.
         if event.character and event.character.isprintable():
             search_input = self.query_one("#search_input", Input)
             if not search_input.has_focus:
                 search_input.focus()
-            # Do not stop propagation so that the Input widget handles and displays the key normally.
+                status_widget = self.query_one("#status", Static)
+                status_widget.update(search_input.value)
+            # Let the Input widget process the key normally.
 
     def on_input_changed(self, event: Input.Changed) -> None:
         search_text = event.value.lower()
