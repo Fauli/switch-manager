@@ -7,7 +7,7 @@ from textual import events
 from textual.timer import Timer
 
 class SwitchManagerApp(App):
-    CSS_PATH = "switch_manager.css"  # Make sure this file is in the same directory.
+    CSS_PATH = "switch_manager.css" 
     BINDINGS = [
         ("up", "move_up", "Move Up"),
         ("down", "move_down", "Move Down"),
@@ -18,7 +18,7 @@ class SwitchManagerApp(App):
         self.csv_path = csv_path
         self.data = []          # All rows loaded from CSV.
         self.filtered_data = [] # Rows filtered by search.
-        self.commands = ["ssh", "ping", "traceroute", "detail", "exit"]
+        self.commands = ["ssh", "ping", "traceroute", "detail", "exit"] # Supported commands
         self.active_command_index = 0
         self.status_timer: Timer | None = None
     
@@ -30,7 +30,7 @@ class SwitchManagerApp(App):
                     css_class = "command active" if i == self.active_command_index else "command"
                     yield Static(cmd, id=f"cmd-{i}", classes=css_class)
             yield Input(placeholder="Search...", id="search_input")
-            # Wrap the DataTable in its own container.
+            # Wrap the DataTable in its own container so we can add a scrollbar.
             with Vertical(id="table_container"):
                 yield DataTable(id="data_table")
             yield Static("", id="status", classes="status")
@@ -134,7 +134,8 @@ class SwitchManagerApp(App):
             search_input = self.query_one("#search_input", Input)
             if not search_input.has_focus:
                 search_input.focus()
-            # Let the Input widget handle the rest normally.
+            # TODO: probably we shoul also add the typed character to the search input.
+            # then... Let the Input widget handle the rest normally.
 
     def on_input_changed(self, event: Input.Changed) -> None:
         search_text = event.value.lower()
