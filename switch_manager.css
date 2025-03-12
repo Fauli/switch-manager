@@ -2,7 +2,7 @@
 
 Screen {
     background: #1e1e1e;
-    /*color: #c5c8c6; */
+    color: #c5c8c6;
     overflow: hidden;
 }
 
@@ -12,17 +12,19 @@ Screen {
     background: #007acc;
     color: white;
     text-style: bold;
-    margin: 1 0;
+    margin: 0 0;
+    margin-bottom: 1;
 }
 
+/* Main container fills the window */
 #main_container {
     height: 100%;
     width: 100%;
     overflow: hidden;
 }
 
+/* Fixed height for the command bar */
 #command_bar {
-    align: center middle;
     background: #333333;
     height: 3;
     min-height: 3;
@@ -42,29 +44,29 @@ Screen {
     text-style: bold underline;
 }
 
-Input {
-    color: #c5c8c6 !important;
-    background: #2e2e2e !important;
-}
-
-/* Force visible text in the search input using !important */
+/* Search input styling */
 #search_input {
     margin: 1;
     border: heavy #555555;
-    color: #c5c8c6 !important;
-    opacity: 1 !important;
+    background: #2e2e2e;
+    /* Ensure text is visible */
+    color: #c5c8c6;
 }
 
-#search_input * {
-    color: #c5c8c6 !important;
+/* Wrap the data table in its own container that scrolls if needed */
+#table_container {
+    height: 70%;  /* Adjust this percentage as needed */
+    overflow: auto;
 }
 
+/* Let the data table fill its container */
 #data_table {
-    margin: 1;
+    margin: 0;
     border: heavy #555555;
     height: auto;
 }
 
+/* Fixed height for the status bar */
 .status {
     background: #444444;
     color: white;

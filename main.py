@@ -29,9 +29,10 @@ class SwitchManagerApp(App):
                 for i, cmd in enumerate(self.commands):
                     css_class = "command active" if i == self.active_command_index else "command"
                     yield Static(cmd, id=f"cmd-{i}", classes=css_class)
-            # Remove inline style; styling is done via CSS.
             yield Input(placeholder="Search...", id="search_input")
-            yield DataTable(id="data_table")
+            # Wrap the DataTable in its own container.
+            with Vertical(id="table_container"):
+                yield DataTable(id="data_table")
             yield Static("", id="status", classes="status")
     
     def on_mount(self) -> None:
@@ -80,12 +81,12 @@ class SwitchManagerApp(App):
             else:
                 widget.remove_class("active")
     
-    async def action_move_up(self) -> None:
+    def action_move_up(self) -> None:
         table = self.query_one(DataTable)
         if table.row_count > 0:
             table.action_cursor_up()
     
-    async def action_move_down(self) -> None:
+    def action_move_down(self) -> None:
         table = self.query_one(DataTable)
         if table.row_count > 0:
             table.action_cursor_down()
@@ -128,14 +129,12 @@ class SwitchManagerApp(App):
             event.stop()
             return
         
-        # For any printable key (other than left/right and enter), if search input is not focused, focus it.
+        # For any printable key (other than left/right and enter), if the search input isn't focused, focus it.
         if event.character and event.character.isprintable():
             search_input = self.query_one("#search_input", Input)
             if not search_input.has_focus:
                 search_input.focus()
-                status_widget = self.query_one("#status", Static)
-                status_widget.update(search_input.value)
-            # Let the Input widget process the key normally.
+            # Let the Input widget handle the rest normally.
 
     def on_input_changed(self, event: Input.Changed) -> None:
         search_text = event.value.lower()
