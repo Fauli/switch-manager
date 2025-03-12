@@ -24,16 +24,16 @@ Screen {
     background: #333333;
 }
 
-/* Fix the width so all commands are visible */
+/* Each command has a fixed width so that all are visible */
 .command {
     padding: 0 2;
     margin: 0 1;
     border: round #555555;
-    width: 12;
+    width: 20;
     text-align: center;
 }
 
-/* Active command style */
+/* Active command styling */
 .command.active {
     text-style: bold underline;
 }
@@ -42,6 +42,7 @@ Screen {
     margin: 1;
     padding: 1;
     border: heavy #555555;
+    color: white;
 }
 
 #data_table {
@@ -49,3 +50,12 @@ Screen {
     border: heavy #555555;
     height: 70%;
 }
+
+.status {
+    padding: 1;
+    text-align: center;
+    background: #444444;
+    color: white;
+}
+
+
