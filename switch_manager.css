@@ -12,18 +12,15 @@ Screen {
     background: #007acc;
     color: white;
     text-style: bold;
-    margin: 0 0;
-    margin-bottom: 1;
+    margin: 1 0;
 }
 
-/* Main container fills the window */
 #main_container {
     height: 100%;
     width: 100%;
     overflow: hidden;
 }
 
-/* Fixed height for the command bar */
 #command_bar {
     background: #333333;
     height: 3;
@@ -36,7 +33,7 @@ Screen {
     padding: 0 1;
     margin: 0 1;
     border: round #555555;
-    width: 18;
+    width: 12;
     text-align: center;
 }
 
@@ -44,29 +41,25 @@ Screen {
     text-style: bold underline;
 }
 
-/* Search input styling */
 #search_input {
     margin: 1;
+    padding: 1;
     border: heavy #555555;
     background: #2e2e2e;
-    /* Ensure text is visible */
     color: #c5c8c6;
 }
 
-/* Wrap the data table in its own container that scrolls if needed */
 #table_container {
-    height: 70%;  /* Adjust this percentage as needed */
+    height: 70%;  /* Adjust as needed */
     overflow: auto;
 }
 
-/* Let the data table fill its container */
 #data_table {
-    margin: 0;
+    margin: 1;
     border: heavy #555555;
     height: auto;
 }
 
-/* Fixed height for the status bar */
 .status {
     background: #444444;
     color: white;

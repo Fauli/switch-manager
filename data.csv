@@ -1,5 +1,5 @@
 Name;IP;subnet;aliases;comment;type;id;responsible;aix_server
-sw001-lx-prod;10.0.1.1;rum;Main switch;alt;core;455;Alice;server5
+sw001-lx-prod;192.168.10.1;rum;Main switch;alt;core;455;Alice;server5
 sw002-lx-test;10.0.1.2;bas;Edge switch;neu;distribution;429;Alice;server3
 sw003-lx-backup;10.0.1.3;rum;Backup switch;alt;core;279;Alice;server5
 sw004-lx-edge;10.0.1.4;zur;Backup switch;alt;edge;745;Charlie;server2

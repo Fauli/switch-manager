@@ -1,13 +1,85 @@
+import asyncio
 import csv
+import os
+import subprocess
 from pathlib import Path
 from textual.app import App, ComposeResult
 from textual.widgets import Static, DataTable, Input
 from textual.containers import Horizontal, Vertical
 from textual import events
 from textual.timer import Timer
+from textual.screen import Screen
+from textual.scroll_view import ScrollView
+
+class StreamingOutputScreen(Screen):
+    """A modal screen that streams command output as it is produced."""
+    def __init__(self, cmd: list, **kwargs):
+        self.cmd = cmd
+        self.output = ""
+        super().__init__(**kwargs)
+    
+    def compose(self) -> ComposeResult:
+        yield Static("Press ESC to close", id="modal_header")
+        yield ScrollView(Static("", id="output_text"), id="modal_body")
+    
+    async def on_mount(self) -> None:
+        asyncio.create_task(self.stream_output())
+    
+    async def stream_output(self) -> None:
+        proc = await asyncio.create_subprocess_exec(
+            *self.cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT
+        )
+        output_widget = self.query_one("#output_text", Static)
+        while True:
+            line = await proc.stdout.readline()
+            if not line:
+                break
+            decoded = line.decode()
+            self.output += decoded
+            output_widget.update(self.output)
+        await proc.wait()
+    
+    async def on_key(self, event: events.Key) -> None:
+        if event.key == "escape":
+            await self.app.pop_screen()
+            event.stop()
+    
+    async def on_unmount(self) -> None:
+        # Wait a bit and restore focus to the main DataTable.
+        await asyncio.sleep(0.3)
+        try:
+            self.app.set_focus(self.app.query_one(SwitchManagerApp))
+            #self.app.set_focus(self.app.query_one(DataTable))
+        except Exception as e:
+            self.app.log(f"Focus restoration error (streaming): {e}")
+
+class OutputScreen(Screen):
+    """A modal screen to display immediate output (or details)."""
+    def __init__(self, output_text: str, **kwargs):
+        self.output_text = output_text
+        super().__init__(**kwargs)
+    
+    def compose(self) -> ComposeResult:
+        yield Static("Press ESC to close", id="modal_header")
+        yield ScrollView(Static(self.output_text, id="output_text"), id="modal_body")
+    
+    async def on_key(self, event: events.Key) -> None:
+        if event.key == "escape":
+            await self.app.pop_screen()
+            event.stop()
+    
+    async def on_unmount(self) -> None:
+        # Wait a bit and restore focus to the main DataTable.
+        await asyncio.sleep(0.3)
+        try:
+            self.app.set_focus(self.app.query_one(DataTable))
+        except Exception as e:
+            self.app.log(f"Focus restoration error (output): {e}")
 
 class SwitchManagerApp(App):
-    CSS_PATH = "switch_manager.css" 
+    CSS_PATH = "switch_manager.css"
     BINDINGS = [
         ("up", "move_up", "Move Up"),
         ("down", "move_down", "Move Down"),
@@ -17,8 +89,8 @@ class SwitchManagerApp(App):
         super().__init__(**kwargs)
         self.csv_path = csv_path
         self.data = []          # All rows loaded from CSV.
-        self.filtered_data = [] # Rows filtered by search.
-        self.commands = ["ssh", "ping", "traceroute", "detail", "exit"] # Supported commands
+        self.filtered_data = [] # Filtered rows.
+        self.commands = ["ssh", "ping", "traceroute", "detail", "exit"]
         self.active_command_index = 0
         self.status_timer: Timer | None = None
     
@@ -30,7 +102,6 @@ class SwitchManagerApp(App):
                     css_class = "command active" if i == self.active_command_index else "command"
                     yield Static(cmd, id=f"cmd-{i}", classes=css_class)
             yield Input(placeholder="Search...", id="search_input")
-            # Wrap the DataTable in its own container so we can add a scrollbar.
             with Vertical(id="table_container"):
                 yield DataTable(id="data_table")
             yield Static("", id="status", classes="status")
@@ -42,7 +113,7 @@ class SwitchManagerApp(App):
         table.cursor_type = "row"
         table.focus()
     
-    def load_csv(self):
+    def load_csv(self) -> None:
         csv_file = Path(self.csv_path)
         if csv_file.exists():
             with csv_file.open("r", newline="", encoding="utf-8") as f:
@@ -52,7 +123,7 @@ class SwitchManagerApp(App):
             self.data = []
         self.filtered_data = self.data.copy()
     
-    def update_table(self, rows):
+    def update_table(self, rows) -> None:
         table = self.query_one(DataTable)
         table.clear(columns=True)
         table.add_columns("Name", "IP", "subnet", "Alias", "comment")
@@ -73,7 +144,7 @@ class SwitchManagerApp(App):
         self.active_command_index = (self.active_command_index + 1) % len(self.commands)
         self.refresh_command_bar()
     
-    def refresh_command_bar(self):
+    def refresh_command_bar(self) -> None:
         for i, _ in enumerate(self.commands):
             widget = self.query_one(f"#cmd-{i}", Static)
             if i == self.active_command_index:
@@ -91,29 +162,35 @@ class SwitchManagerApp(App):
         if table.row_count > 0:
             table.action_cursor_down()
     
-    def action_execute_command(self) -> None:
+    async def action_execute_command(self) -> None:
         table = self.query_one(DataTable)
-        if table.cursor_row is not None and self.filtered_data:
-            row_index = table.cursor_row
-            if row_index < len(self.filtered_data):
-                row_data = self.filtered_data[row_index]
-                command = self.commands[self.active_command_index]
-                message = f"Executing {command} on {row_data}"
-                self.log(message)
-                status_widget = self.query_one("#status", Static)
-                status_widget.update(message)
-                if self.status_timer:
-                    self.status_timer.pause()
-                self.status_timer = self.set_timer(3, self.clear_status)
-                if command == "exit":
-                    self.exit()
+        if table.cursor_row is None or not self.filtered_data:
+            return
+        row_index = table.cursor_row
+        if row_index >= len(self.filtered_data):
+            return
+        row_data = self.filtered_data[row_index]
+        ip = row_data.get("IP", "").strip()
+        command = self.commands[self.active_command_index]
+        
+        if command == "exit":
+            self.exit()
+        elif command == "ssh":
+            self.exit()
+            os.system(f"ssh {ip}")
+        elif command == "ping":
+            await self.push_screen(StreamingOutputScreen(["ping", "-c", "4", ip]))
+        elif command == "traceroute":
+            await self.push_screen(StreamingOutputScreen(["traceroute", ip]))
+        elif command == "detail":
+            details = "\n".join([f"{k}: {v}" for k, v in row_data.items()])
+            await self.push_screen(OutputScreen(details))
     
     def clear_status(self) -> None:
         status_widget = self.query_one("#status", Static)
         status_widget.update("")
     
     async def on_key(self, event: events.Key) -> None:
-        # Intercept left/right arrow keys for command switching.
         if event.key in ("left", "right"):
             if event.key == "left":
                 self.action_prev_command()
@@ -122,21 +199,20 @@ class SwitchManagerApp(App):
             event.stop()
             return
         
-        # Intercept Enter key regardless of focus.
         if event.key == "enter":
-            self.action_execute_command()
-            self.query_one(DataTable).focus()
+            await self.action_execute_command()
+            try:
+                self.query_one(DataTable).focus()
+            except Exception:
+                pass
             event.stop()
             return
         
-        # For any printable key (other than left/right and enter), if the search input isn't focused, focus it.
         if event.character and event.character.isprintable():
             search_input = self.query_one("#search_input", Input)
             if not search_input.has_focus:
                 search_input.focus()
-            # TODO: probably we shoul also add the typed character to the search input.
-            # then... Let the Input widget handle the rest normally.
-
+    
     def on_input_changed(self, event: Input.Changed) -> None:
         search_text = event.value.lower()
         if search_text == "":
