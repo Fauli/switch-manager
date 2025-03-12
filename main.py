@@ -7,8 +7,7 @@ from textual import events
 from textual.timer import Timer
 
 class SwitchManagerApp(App):
-    CSS_PATH = "switch_manager.css"  # Ensure this file is in the same directory.
-    # Bindings for up/down navigation.
+    CSS_PATH = "switch_manager.css"  # Place this file in the same directory.
     BINDINGS = [
         ("up", "move_up", "Move Up"),
         ("down", "move_down", "Move Down"),
@@ -18,7 +17,7 @@ class SwitchManagerApp(App):
         super().__init__(**kwargs)
         self.csv_path = csv_path
         self.data = []          # All rows loaded from CSV.
-        self.filtered_data = [] # Currently filtered rows (for dynamic search).
+        self.filtered_data = [] # Rows filtered by search.
         self.commands = ["ssh", "ping", "traceroute", "detail", "exit"]
         self.active_command_index = 0
         self.status_timer: Timer | None = None
@@ -124,18 +123,17 @@ class SwitchManagerApp(App):
         # Intercept Enter key regardless of focus.
         if event.key == "enter":
             self.action_execute_command()
-            # Optionally, shift focus back to the table.
             self.query_one(DataTable).focus()
             event.stop()
             return
         
-        # For any other printable key, if the search input isn't focused, set focus.
+        # For printable keys (other than left/right and enter), if the search input is not focused, focus it.
         if event.character and event.character.isprintable():
             search_input = self.query_one("#search_input", Input)
             if not search_input.has_focus:
                 search_input.focus()
-            # Let the Input widget handle the rest.
-    
+            # Do not stop propagation so that the Input widget handles and displays the key normally.
+
     def on_input_changed(self, event: Input.Changed) -> None:
         search_text = event.value.lower()
         if search_text == "":
