@@ -1,0 +1,51 @@
+/* switch_manager.css */
+
+Screen {
+    background: #1e1e1e;
+    color: #c5c8c6;
+}
+
+#title {
+    text-align: center;
+    padding: 1;
+    background: #007acc;
+    color: white;
+    text-style: bold;
+    margin: 1 0;
+}
+
+#main_container {
+    height: 100%;
+    width: 100%;
+}
+
+#command_bar {
+    padding: 1;
+    background: #333333;
+}
+
+/* Fix the width so all commands are visible */
+.command {
+    padding: 0 2;
+    margin: 0 1;
+    border: round #555555;
+    width: 12;
+    text-align: center;
+}
+
+/* Active command style */
+.command.active {
+    text-style: bold underline;
+}
+
+#search_input {
+    margin: 1;
+    padding: 1;
+    border: heavy #555555;
+}
+
+#data_table {
+    margin: 1;
+    border: heavy #555555;
+    height: 70%;
+}
