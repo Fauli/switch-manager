@@ -1,0 +1,918 @@
+2025-03-13 22:07:07,579 DEBUG: Starting SwitchManagerApp
+2025-03-13 22:07:07,579 DEBUG: Initializing SwitchManagerApp with CSV path: data.csv
+2025-03-13 22:07:07,581 DEBUG: Using selector: KqueueSelector
+2025-03-13 22:07:07,587 DEBUG: Composing main SwitchManagerApp widgets
+2025-03-13 22:07:07,593 DEBUG: SwitchManagerApp mounting: loading CSV and updating table
+2025-03-13 22:07:07,593 DEBUG: Loading CSV data
+2025-03-13 22:07:07,594 DEBUG: CSV loaded with 56 rows
+2025-03-13 22:07:07,594 DEBUG: Updating table with 56 rows
+2025-03-13 22:07:07,595 DEBUG: DataTable focused in SwitchManagerApp on_mount
+2025-03-13 22:07:09,034 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:07:09,035 DEBUG: Processing enter key: executing command
+2025-03-13 22:07:09,035 DEBUG: Executing command 'ssh' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:07:09,035 DEBUG: SSH command received; pushing SshScreen for 192.168.10.1
+2025-03-13 22:07:09,035 DEBUG: Initializing SshScreen for SSH to 192.168.10.1
+2025-03-13 22:07:09,037 DEBUG: Composing SshScreen widgets
+2025-03-13 22:07:09,042 DEBUG: SshScreen mounted, opening PTY and starting SSH process
+2025-03-13 22:07:09,096 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:07:25,947 DEBUG: Starting SwitchManagerApp
+2025-03-13 22:07:25,947 DEBUG: Initializing SwitchManagerApp with CSV path: data.csv
+2025-03-13 22:07:25,950 DEBUG: Using selector: KqueueSelector
+2025-03-13 22:07:25,955 DEBUG: Composing main SwitchManagerApp widgets
+2025-03-13 22:07:25,961 DEBUG: SwitchManagerApp mounting: loading CSV and updating table
+2025-03-13 22:07:25,961 DEBUG: Loading CSV data
+2025-03-13 22:07:25,961 DEBUG: CSV loaded with 56 rows
+2025-03-13 22:07:25,961 DEBUG: Updating table with 56 rows
+2025-03-13 22:07:25,962 DEBUG: DataTable focused in SwitchManagerApp on_mount
+2025-03-13 22:07:26,530 DEBUG: SwitchManagerApp received key event: right
+2025-03-13 22:07:26,531 DEBUG: Processing right key: switching to next command
+2025-03-13 22:07:26,531 DEBUG: SwitchManagerApp: Moving to next command
+2025-03-13 22:07:26,531 DEBUG: Refreshing command bar, active_command_index: 1
+2025-03-13 22:07:27,201 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:07:27,201 DEBUG: Processing enter key: executing command
+2025-03-13 22:07:27,201 DEBUG: Executing command 'ping' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:07:27,202 DEBUG: Ping command received; pushing StreamingOutputScreen for 192.168.10.1
+2025-03-13 22:07:27,202 DEBUG: Initializing StreamingOutputScreen with command: ['ping', '-c', '4', '192.168.10.1']
+2025-03-13 22:07:27,203 DEBUG: Composing StreamingOutputScreen widgets
+2025-03-13 22:07:27,207 DEBUG: StreamingOutputScreen mounted, starting stream_output
+2025-03-13 22:07:27,225 DEBUG: Starting subprocess for command: ['ping', '-c', '4', '192.168.10.1']
+2025-03-13 22:07:27,231 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:07:27,238 DEBUG: StreamingOutputScreen output line: PING 192.168.10.1 (192.168.10.1): 56 data bytes
+2025-03-13 22:07:27,238 DEBUG: StreamingOutputScreen output line: 64 bytes from 192.168.10.1: icmp_seq=0 ttl=64 time=8.158 ms
+2025-03-13 22:07:28,238 DEBUG: StreamingOutputScreen output line: 64 bytes from 192.168.10.1: icmp_seq=1 ttl=64 time=2.768 ms
+2025-03-13 22:07:29,224 DEBUG: StreamingOutputScreen received ESC key, setting close flag
+2025-03-13 22:07:29,224 DEBUG: SwitchManagerApp popping screen (modal closed)
+2025-03-13 22:07:29,265 DEBUG: StreamingOutputScreen output line: 64 bytes from 192.168.10.1: icmp_seq=2 ttl=64 time=6.270 ms
+2025-03-13 22:07:29,266 DEBUG: stream_output detected close flag; breaking out of loop
+2025-03-13 22:07:29,266 DEBUG: StreamingOutputScreen unmounting, cancelling stream task if still running
+2025-03-13 22:07:29,266 DEBUG: Stream task cancelled in on_unmount
+2025-03-13 22:07:29,567 DEBUG: Focus successfully restored to DataTable in StreamingOutputScreen
+2025-03-13 22:07:29,581 DEBUG: Focus restored to DataTable after popping modal
+2025-03-13 22:07:29,717 DEBUG: SwitchManagerApp received key event: right
+2025-03-13 22:07:29,717 DEBUG: Processing right key: switching to next command
+2025-03-13 22:07:29,717 DEBUG: SwitchManagerApp: Moving to next command
+2025-03-13 22:07:29,717 DEBUG: Refreshing command bar, active_command_index: 2
+2025-03-13 22:07:30,096 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:07:30,097 DEBUG: Processing enter key: executing command
+2025-03-13 22:07:30,097 DEBUG: Executing command 'traceroute' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:07:30,097 DEBUG: Traceroute command received; pushing StreamingOutputScreen for 192.168.10.1
+2025-03-13 22:07:30,098 DEBUG: Initializing StreamingOutputScreen with command: ['traceroute', '192.168.10.1']
+2025-03-13 22:07:30,100 DEBUG: Composing StreamingOutputScreen widgets
+2025-03-13 22:07:30,103 DEBUG: StreamingOutputScreen mounted, starting stream_output
+2025-03-13 22:07:30,118 DEBUG: Starting subprocess for command: ['traceroute', '192.168.10.1']
+2025-03-13 22:07:30,125 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:07:30,127 DEBUG: StreamingOutputScreen output line: traceroute to 192.168.10.1 (192.168.10.1), 64 hops max, 40 byte packets
+2025-03-13 22:07:30,149 DEBUG: StreamingOutputScreen output line: 1  router.lan (192.168.10.1)  8.683 ms  2.511 ms  2.772 ms
+2025-03-13 22:07:30,149 DEBUG: Subprocess finished in StreamingOutputScreen
+2025-03-13 22:07:33,492 DEBUG: StreamingOutputScreen received ESC key, setting close flag
+2025-03-13 22:07:33,493 DEBUG: SwitchManagerApp popping screen (modal closed)
+2025-03-13 22:07:33,534 DEBUG: StreamingOutputScreen unmounting, cancelling stream task if still running
+2025-03-13 22:07:33,836 DEBUG: Focus successfully restored to DataTable in StreamingOutputScreen
+2025-03-13 22:07:33,849 DEBUG: Focus restored to DataTable after popping modal
+2025-03-13 22:08:49,814 DEBUG: Starting SwitchManagerApp
+2025-03-13 22:08:49,814 DEBUG: Initializing SwitchManagerApp with CSV path: data.csv
+2025-03-13 22:08:49,816 DEBUG: Using selector: KqueueSelector
+2025-03-13 22:08:49,822 DEBUG: Composing main SwitchManagerApp widgets
+2025-03-13 22:08:49,827 DEBUG: SwitchManagerApp mounting: loading CSV and updating table
+2025-03-13 22:08:49,828 DEBUG: Loading CSV data
+2025-03-13 22:08:49,828 DEBUG: CSV loaded with 56 rows
+2025-03-13 22:08:49,828 DEBUG: Updating table with 56 rows
+2025-03-13 22:08:49,829 DEBUG: DataTable focused in SwitchManagerApp on_mount
+2025-03-13 22:08:50,434 DEBUG: SwitchManagerApp received key event: right
+2025-03-13 22:08:50,434 DEBUG: Processing right key: switching to next command
+2025-03-13 22:08:50,435 DEBUG: SwitchManagerApp: Moving to next command
+2025-03-13 22:08:50,435 DEBUG: Refreshing command bar, active_command_index: 1
+2025-03-13 22:08:50,625 DEBUG: SwitchManagerApp received key event: right
+2025-03-13 22:08:50,626 DEBUG: Processing right key: switching to next command
+2025-03-13 22:08:50,626 DEBUG: SwitchManagerApp: Moving to next command
+2025-03-13 22:08:50,626 DEBUG: Refreshing command bar, active_command_index: 2
+2025-03-13 22:08:51,193 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:08:51,194 DEBUG: Processing enter key: executing command
+2025-03-13 22:08:51,194 DEBUG: Executing command 'traceroute' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:08:51,194 DEBUG: Traceroute command received; pushing StreamingOutputScreen for 192.168.10.1
+2025-03-13 22:08:51,194 DEBUG: Initializing StreamingOutputScreen with command: ['traceroute', '192.168.10.1']
+2025-03-13 22:08:51,196 DEBUG: Composing StreamingOutputScreen widgets
+2025-03-13 22:08:51,200 DEBUG: StreamingOutputScreen mounted, starting stream_output
+2025-03-13 22:08:51,216 DEBUG: Starting subprocess for command: ['traceroute', '192.168.10.1']
+2025-03-13 22:08:51,223 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:08:51,224 DEBUG: StreamingOutputScreen output line: traceroute to 192.168.10.1 (192.168.10.1), 64 hops max, 40 byte packets
+2025-03-13 22:08:51,246 DEBUG: StreamingOutputScreen output line: 1  router.lan (192.168.10.1)  9.227 ms  2.617 ms  2.499 ms
+2025-03-13 22:08:51,247 DEBUG: Subprocess finished in StreamingOutputScreen
+2025-03-13 22:08:52,917 DEBUG: StreamingOutputScreen received ESC key, setting close flag
+2025-03-13 22:08:52,918 DEBUG: SwitchManagerApp popping screen (modal closed)
+2025-03-13 22:08:52,958 DEBUG: StreamingOutputScreen unmounting, cancelling stream task if still running
+2025-03-13 22:08:53,260 DEBUG: Focus successfully restored to DataTable in StreamingOutputScreen
+2025-03-13 22:08:53,273 DEBUG: Focus restored to DataTable after popping modal
+2025-03-13 22:08:53,313 DEBUG: SwitchManagerApp received key event: left
+2025-03-13 22:08:53,313 DEBUG: Processing left key: switching to previous command
+2025-03-13 22:08:53,313 DEBUG: SwitchManagerApp: Moving to previous command
+2025-03-13 22:08:53,313 DEBUG: Refreshing command bar, active_command_index: 1
+2025-03-13 22:08:53,818 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:08:53,819 DEBUG: Processing enter key: executing command
+2025-03-13 22:08:53,819 DEBUG: Executing command 'ping' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:08:53,819 DEBUG: Ping command received; pushing StreamingOutputScreen for 192.168.10.1
+2025-03-13 22:08:53,819 DEBUG: Initializing StreamingOutputScreen with command: ['ping', '-c', '4', '192.168.10.1']
+2025-03-13 22:08:53,821 DEBUG: Composing StreamingOutputScreen widgets
+2025-03-13 22:08:53,825 DEBUG: StreamingOutputScreen mounted, starting stream_output
+2025-03-13 22:08:53,841 DEBUG: Starting subprocess for command: ['ping', '-c', '4', '192.168.10.1']
+2025-03-13 22:08:53,848 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:08:53,853 DEBUG: StreamingOutputScreen output line: PING 192.168.10.1 (192.168.10.1): 56 data bytes
+2025-03-13 22:08:53,854 DEBUG: StreamingOutputScreen output line: 64 bytes from 192.168.10.1: icmp_seq=0 ttl=64 time=7.829 ms
+2025-03-13 22:08:54,519 DEBUG: StreamingOutputScreen received ESC key, setting close flag
+2025-03-13 22:08:54,520 DEBUG: SwitchManagerApp popping screen (modal closed)
+2025-03-13 22:08:54,561 DEBUG: StreamingOutputScreen unmounting, cancelling stream task if still running
+2025-03-13 22:08:54,561 DEBUG: stream_output task was cancelled
+2025-03-13 22:08:54,562 DEBUG: Stream task cancelled in on_unmount
+2025-03-13 22:08:54,863 DEBUG: Focus successfully restored to DataTable in StreamingOutputScreen
+2025-03-13 22:08:54,875 DEBUG: Focus restored to DataTable after popping modal
+2025-03-13 22:08:56,268 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:08:56,269 DEBUG: Processing enter key: executing command
+2025-03-13 22:08:56,269 DEBUG: Executing command 'ping' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:08:56,269 DEBUG: Ping command received; pushing StreamingOutputScreen for 192.168.10.1
+2025-03-13 22:08:56,269 DEBUG: Initializing StreamingOutputScreen with command: ['ping', '-c', '4', '192.168.10.1']
+2025-03-13 22:08:56,271 DEBUG: Composing StreamingOutputScreen widgets
+2025-03-13 22:08:56,275 DEBUG: StreamingOutputScreen mounted, starting stream_output
+2025-03-13 22:08:56,290 DEBUG: Starting subprocess for command: ['ping', '-c', '4', '192.168.10.1']
+2025-03-13 22:08:56,297 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:08:56,304 DEBUG: StreamingOutputScreen output line: PING 192.168.10.1 (192.168.10.1): 56 data bytes
+2025-03-13 22:08:56,305 DEBUG: StreamingOutputScreen output line: 64 bytes from 192.168.10.1: icmp_seq=0 ttl=64 time=8.752 ms
+2025-03-13 22:08:57,133 DEBUG: StreamingOutputScreen received ESC key, setting close flag
+2025-03-13 22:08:57,134 DEBUG: SwitchManagerApp popping screen (modal closed)
+2025-03-13 22:08:57,175 DEBUG: StreamingOutputScreen unmounting, cancelling stream task if still running
+2025-03-13 22:08:57,175 DEBUG: stream_output task was cancelled
+2025-03-13 22:08:57,176 DEBUG: Stream task cancelled in on_unmount
+2025-03-13 22:08:57,477 DEBUG: Focus successfully restored to DataTable in StreamingOutputScreen
+2025-03-13 22:08:57,490 DEBUG: Focus restored to DataTable after popping modal
+2025-03-13 22:08:58,603 DEBUG: SwitchManagerApp received key event: left
+2025-03-13 22:08:58,604 DEBUG: Processing left key: switching to previous command
+2025-03-13 22:08:58,604 DEBUG: SwitchManagerApp: Moving to previous command
+2025-03-13 22:08:58,604 DEBUG: Refreshing command bar, active_command_index: 0
+2025-03-13 22:08:58,911 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:08:58,911 DEBUG: Processing enter key: executing command
+2025-03-13 22:08:58,912 DEBUG: Executing command 'ssh' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:08:58,912 DEBUG: SSH command received; pushing SshScreen for 192.168.10.1
+2025-03-13 22:08:58,912 DEBUG: Initializing SshScreen for SSH to 192.168.10.1
+2025-03-13 22:08:58,914 DEBUG: Composing SshScreen widgets
+2025-03-13 22:08:58,921 DEBUG: SshScreen mounted, opening PTY and starting SSH process
+2025-03-13 22:08:58,950 DEBUG: SshScreen starting to read PTY output
+2025-03-13 22:08:58,953 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:09:02,844 DEBUG: SwitchManagerApp received key event: left_square_bracket
+2025-03-13 22:09:02,844 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:02,844 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,844 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,844 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,844 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,844 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,845 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,845 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:02,845 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,845 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,845 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,845 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,845 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,852 DEBUG: SwitchManagerApp received key event: left_square_bracket
+2025-03-13 22:09:02,852 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:02,852 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,852 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,852 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,852 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,852 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,852 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:02,852 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,852 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,853 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,853 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,853 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:02,853 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,858 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,868 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,868 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:02,868 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,869 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:02,869 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,869 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:02,869 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,869 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,869 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,876 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,876 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,876 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:02,876 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:02,876 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,877 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,884 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,884 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,884 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,885 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,885 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:02,885 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:02,885 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,885 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,892 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:02,892 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:02,892 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:02,893 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,893 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,893 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:02,893 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:02,893 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,893 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,900 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,900 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:02,900 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,900 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,900 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,900 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,900 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:02,900 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,908 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,908 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:02,908 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:02,908 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:02,908 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,919 DEBUG: SwitchManagerApp received key event: left_square_bracket
+2025-03-13 22:09:02,920 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:02,920 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,921 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,921 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,921 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,921 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:02,921 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,922 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,922 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,922 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,922 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,922 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:02,922 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,924 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,924 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,925 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:02,925 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,925 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:02,925 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,942 DEBUG: SwitchManagerApp received key event: left_square_bracket
+2025-03-13 22:09:02,942 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:02,942 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,942 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,942 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,943 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:02,943 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:02,943 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,943 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,943 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,944 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:02,944 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,944 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,944 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,950 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,950 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,950 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,950 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:02,950 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,950 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,951 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,958 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,958 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,958 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,958 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:02,958 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,959 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,959 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,959 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,959 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:02,959 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,959 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,959 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,966 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,966 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,966 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:02,966 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,966 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,966 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,967 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:02,967 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,967 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,967 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,991 DEBUG: SwitchManagerApp received key event: left_square_bracket
+2025-03-13 22:09:02,991 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:02,991 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,991 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,992 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,992 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,992 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:02,992 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,992 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,992 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,993 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:02,993 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,993 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,993 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:02,998 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,998 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:02,998 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,998 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:02,999 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:02,999 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:02,999 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:02,999 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:02,999 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:02,999 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,006 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,006 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,006 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,006 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,006 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,007 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,007 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,007 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,007 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,015 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,015 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,015 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,015 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,015 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,016 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,016 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,016 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,016 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,016 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,016 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,022 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,022 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,022 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,022 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,022 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,031 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,031 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,031 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,031 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,031 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,031 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,031 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,032 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,032 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,032 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,038 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,038 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,039 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,039 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,039 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,039 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,039 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,039 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,047 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,047 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,047 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,047 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,048 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,048 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,048 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,048 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,048 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,048 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,048 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,057 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,057 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,057 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,057 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:03,058 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,067 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,067 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,068 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,068 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,068 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,068 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,068 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,068 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,068 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,068 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,072 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,072 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,072 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,072 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,072 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,072 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,072 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,073 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,073 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,073 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,073 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,081 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,081 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,081 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,081 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,081 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,081 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,081 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,082 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,082 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,087 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,087 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,087 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,088 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,088 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,088 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,088 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,088 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,098 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,098 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,098 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,099 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,099 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,099 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,099 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,099 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,099 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,099 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,100 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,104 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,104 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,104 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,104 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,105 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,105 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,105 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,105 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,105 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,105 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,105 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,105 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,114 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,114 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,114 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,114 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,115 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,115 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,115 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,115 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,115 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,115 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,115 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,116 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,120 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,120 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,120 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,120 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,121 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,121 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,121 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,121 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,121 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,121 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,131 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:03,131 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,131 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,131 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,131 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,131 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,132 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,132 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,132 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,132 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,132 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,132 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,132 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,137 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,137 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,137 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,137 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,137 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,137 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,137 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,137 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,138 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,138 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:03,138 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,138 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,147 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,147 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,147 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:03,147 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,148 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,148 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,148 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:03,148 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,148 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,161 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,161 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,161 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,162 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,162 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,162 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,162 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,162 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:03,162 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:03,163 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,169 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,169 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,169 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,169 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,169 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,169 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,170 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,170 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,176 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,177 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,177 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,177 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,177 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,185 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,185 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,185 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,185 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,185 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,185 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,194 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,194 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,195 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,195 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,195 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,195 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,195 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,195 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,196 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,196 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,201 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,202 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,202 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,202 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,202 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,202 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:03,202 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,209 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,210 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,210 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,210 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,210 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,210 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,210 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,211 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,217 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,217 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,218 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,218 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:03,218 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,226 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,226 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,226 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,226 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,227 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,227 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,227 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,227 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,227 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,234 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,234 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,234 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,234 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,234 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,235 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,301 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,302 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,302 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,302 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,302 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,303 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,303 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,303 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,303 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,303 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,303 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,307 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,307 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,307 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,350 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,350 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,351 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,351 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,351 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,351 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,352 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,352 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,352 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,352 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,357 DEBUG: SwitchManagerApp received key event: left_square_bracket
+2025-03-13 22:09:03,357 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:03,358 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,358 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,358 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,358 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,358 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,358 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,359 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,359 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,359 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,359 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,359 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,359 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,365 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:03,366 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,366 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,366 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,366 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,366 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,366 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,367 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,367 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,367 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,367 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,367 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,367 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,374 DEBUG: SwitchManagerApp received key event: left_square_bracket
+2025-03-13 22:09:03,374 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:03,374 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,374 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,375 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,375 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,375 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,375 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,375 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,375 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,375 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,376 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,376 DEBUG: SwitchManagerApp received key event: 4
+2025-03-13 22:09:03,376 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,380 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,380 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,380 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,381 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,381 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,389 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,389 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,389 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,389 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,389 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,389 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,389 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,390 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,390 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,398 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,398 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,398 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,398 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,398 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,398 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,399 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,399 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,399 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,399 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,399 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,430 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,430 DEBUG: SwitchManagerApp received key event: 0
+2025-03-13 22:09:03,431 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,438 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,438 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,438 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,438 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,438 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,438 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,439 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,451 DEBUG: SwitchManagerApp received key event: left_square_bracket
+2025-03-13 22:09:03,451 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:03,451 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,452 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,452 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,452 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,452 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,452 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,452 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,453 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,453 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,453 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,453 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,453 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,458 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,458 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,458 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,458 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,458 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,459 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,459 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,459 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,459 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,466 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,466 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,466 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,466 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,466 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,467 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,467 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,467 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:09:03,467 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,475 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,475 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,475 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,475 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,476 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,476 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,476 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,476 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,476 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,476 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,491 DEBUG: SwitchManagerApp received key event: left_square_bracket
+2025-03-13 22:09:03,491 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:03,491 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,491 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,491 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,492 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,492 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,492 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,492 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,492 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,492 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,492 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,492 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,493 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,498 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,499 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,499 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,499 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,499 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,499 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,499 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,499 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,499 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:03,514 DEBUG: SwitchManagerApp received key event: less_than_sign
+2025-03-13 22:09:03,515 DEBUG: SwitchManagerApp received key event: 3
+2025-03-13 22:09:03,515 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:03,515 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,515 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,515 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:03,515 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,515 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:03,515 DEBUG: SwitchManagerApp received key event: 1
+2025-03-13 22:09:03,516 DEBUG: SwitchManagerApp received key event: 6
+2025-03-13 22:09:03,516 DEBUG: SwitchManagerApp received key event: 8
+2025-03-13 22:09:03,516 DEBUG: SwitchManagerApp received key event: 2
+2025-03-13 22:09:03,516 DEBUG: SwitchManagerApp received key event: M
+2025-03-13 22:09:04,292 DEBUG: SwitchManagerApp received key event: a
+2025-03-13 22:09:04,672 DEBUG: SwitchManagerApp received key event: d
+2025-03-13 22:09:08,117 DEBUG: SwitchManagerApp received key event: left_square_bracket
+2025-03-13 22:09:08,118 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:08,122 DEBUG: SwitchManagerApp received key event: 9
+2025-03-13 22:09:08,122 DEBUG: SwitchManagerApp received key event: semicolon
+2025-03-13 22:09:08,122 DEBUG: SwitchManagerApp received key event: 5
+2025-03-13 22:09:08,127 DEBUG: SwitchManagerApp received key event: u
+2025-03-13 22:09:09,166 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:09:09,166 DEBUG: Processing enter key: executing command
+2025-03-13 22:09:09,166 DEBUG: No row selected or filtered data is empty; aborting command execution
+2025-03-13 22:09:09,167 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:09:09,336 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:09:09,337 DEBUG: Processing enter key: executing command
+2025-03-13 22:09:09,337 DEBUG: No row selected or filtered data is empty; aborting command execution
+2025-03-13 22:09:09,337 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:09:10,243 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:09:10,243 DEBUG: Processing enter key: executing command
+2025-03-13 22:09:10,244 DEBUG: No row selected or filtered data is empty; aborting command execution
+2025-03-13 22:09:10,244 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:09:10,917 DEBUG: SwitchManagerApp received key event: ctrl+c
+2025-03-13 22:09:12,457 DEBUG: SshScreen received ESC key, terminating SSH session
+2025-03-13 22:09:12,664 DEBUG: SshScreen unmounting, cleaning up PTY and tasks
+2025-03-13 22:09:12,664 DEBUG: PTY read task cancelled in SshScreen on_unmount
+2025-03-13 22:09:12,966 DEBUG: No DataTable found in SshScreen on_unmount
+2025-03-13 22:09:44,011 DEBUG: Starting SwitchManagerApp
+2025-03-13 22:09:44,011 DEBUG: Initializing SwitchManagerApp with CSV path: data.csv
+2025-03-13 22:09:44,014 DEBUG: Using selector: KqueueSelector
+2025-03-13 22:09:44,020 DEBUG: Composing main SwitchManagerApp widgets
+2025-03-13 22:09:44,027 DEBUG: SwitchManagerApp mounting: loading CSV and updating table
+2025-03-13 22:09:44,027 DEBUG: Loading CSV data
+2025-03-13 22:09:44,027 DEBUG: CSV loaded with 56 rows
+2025-03-13 22:09:44,027 DEBUG: Updating table with 56 rows
+2025-03-13 22:09:44,028 DEBUG: DataTable focused in SwitchManagerApp on_mount
+2025-03-13 22:09:44,977 DEBUG: SwitchManagerApp received key event: down
+2025-03-13 22:09:45,182 DEBUG: SwitchManagerApp received key event: down
+2025-03-13 22:09:45,329 DEBUG: SwitchManagerApp received key event: down
+2025-03-13 22:09:45,551 DEBUG: SwitchManagerApp received key event: right
+2025-03-13 22:09:45,551 DEBUG: Processing right key: switching to next command
+2025-03-13 22:09:45,551 DEBUG: SwitchManagerApp: Moving to next command
+2025-03-13 22:09:45,551 DEBUG: Refreshing command bar, active_command_index: 1
+2025-03-13 22:09:46,644 DEBUG: SwitchManagerApp received key event: up
+2025-03-13 22:09:46,824 DEBUG: SwitchManagerApp received key event: up
+2025-03-13 22:09:46,965 DEBUG: SwitchManagerApp received key event: up
+2025-03-13 22:09:47,209 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:09:47,209 DEBUG: Processing enter key: executing command
+2025-03-13 22:09:47,210 DEBUG: Executing command 'ping' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:09:47,210 DEBUG: Ping command received; pushing StreamingOutputScreen for 192.168.10.1
+2025-03-13 22:09:47,210 DEBUG: Initializing StreamingOutputScreen with command: ['ping', '-c', '4', '192.168.10.1']
+2025-03-13 22:09:47,211 DEBUG: Composing StreamingOutputScreen widgets
+2025-03-13 22:09:47,214 DEBUG: StreamingOutputScreen mounted, starting stream_output
+2025-03-13 22:09:47,231 DEBUG: Starting subprocess for command: ['ping', '-c', '4', '192.168.10.1']
+2025-03-13 22:09:47,237 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:09:47,239 DEBUG: StreamingOutputScreen output line: PING 192.168.10.1 (192.168.10.1): 56 data bytes
+2025-03-13 22:09:47,240 DEBUG: StreamingOutputScreen output line: 64 bytes from 192.168.10.1: icmp_seq=0 ttl=64 time=4.343 ms
+2025-03-13 22:09:48,243 DEBUG: StreamingOutputScreen output line: 64 bytes from 192.168.10.1: icmp_seq=1 ttl=64 time=2.321 ms
+2025-03-13 22:09:49,248 DEBUG: StreamingOutputScreen output line: 64 bytes from 192.168.10.1: icmp_seq=2 ttl=64 time=2.721 ms
+2025-03-13 22:09:50,196 DEBUG: StreamingOutputScreen received ESC key, setting close flag
+2025-03-13 22:09:50,196 DEBUG: SwitchManagerApp popping screen (modal closed)
+2025-03-13 22:09:50,227 DEBUG: StreamingOutputScreen unmounting, cancelling stream task if still running
+2025-03-13 22:09:50,227 DEBUG: stream_output task was cancelled
+2025-03-13 22:09:50,227 DEBUG: Stream task cancelled in on_unmount
+2025-03-13 22:09:50,529 DEBUG: Focus successfully restored to DataTable in StreamingOutputScreen
+2025-03-13 22:09:50,542 DEBUG: Focus restored to DataTable after popping modal
+2025-03-13 22:11:37,676 DEBUG: SwitchManagerApp received key event: up
+2025-03-13 22:11:38,543 DEBUG: SwitchManagerApp received key event: ctrl+c
+2025-03-13 22:11:40,110 DEBUG: Starting SwitchManagerApp
+2025-03-13 22:11:40,110 DEBUG: Initializing SwitchManagerApp with CSV path: data.csv
+2025-03-13 22:11:40,113 DEBUG: Using selector: KqueueSelector
+2025-03-13 22:11:40,118 DEBUG: Composing main SwitchManagerApp widgets
+2025-03-13 22:11:40,124 DEBUG: SwitchManagerApp mounting: loading CSV and updating table
+2025-03-13 22:11:40,125 DEBUG: Loading CSV data
+2025-03-13 22:11:40,125 DEBUG: CSV loaded with 56 rows
+2025-03-13 22:11:40,125 DEBUG: Updating table with 56 rows
+2025-03-13 22:11:40,126 DEBUG: DataTable focused in SwitchManagerApp on_mount
+2025-03-13 22:11:40,761 DEBUG: SwitchManagerApp received key event: right
+2025-03-13 22:11:40,761 DEBUG: Processing right key: switching to next command
+2025-03-13 22:11:40,761 DEBUG: SwitchManagerApp: Moving to next command
+2025-03-13 22:11:40,761 DEBUG: Refreshing command bar, active_command_index: 1
+2025-03-13 22:11:41,855 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:11:41,855 DEBUG: Processing enter key: executing command
+2025-03-13 22:11:41,856 DEBUG: Executing command 'ping' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:11:41,856 DEBUG: Ping command received; pushing StreamingOutputScreen for 192.168.10.1
+2025-03-13 22:11:41,856 DEBUG: Initializing StreamingOutputScreen with command: ['ping', '-c', '4', '192.168.10.1']
+2025-03-13 22:11:41,858 DEBUG: Composing StreamingOutputScreen widgets
+2025-03-13 22:11:41,863 DEBUG: StreamingOutputScreen mounted, starting stream_output
+2025-03-13 22:11:41,886 DEBUG: Starting subprocess for command: ['ping', '-c', '4', '192.168.10.1']
+2025-03-13 22:11:41,894 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:11:41,901 DEBUG: StreamingOutputScreen output line: PING 192.168.10.1 (192.168.10.1): 56 data bytes
+2025-03-13 22:11:41,901 DEBUG: StreamingOutputScreen output line: 64 bytes from 192.168.10.1: icmp_seq=0 ttl=64 time=8.427 ms
+2025-03-13 22:11:42,904 DEBUG: StreamingOutputScreen output line: 64 bytes from 192.168.10.1: icmp_seq=1 ttl=64 time=6.613 ms
+2025-03-13 22:11:43,452 DEBUG: StreamingOutputScreen received ESC key, setting close flag
+2025-03-13 22:11:43,453 DEBUG: SwitchManagerApp popping screen (modal closed)
+2025-03-13 22:11:43,494 DEBUG: StreamingOutputScreen unmounting, cancelling stream task if still running
+2025-03-13 22:11:43,495 DEBUG: stream_output task was cancelled
+2025-03-13 22:11:43,495 DEBUG: Stream task cancelled in on_unmount
+2025-03-13 22:11:43,796 DEBUG: Focus successfully restored to DataTable in StreamingOutputScreen
+2025-03-13 22:11:43,809 DEBUG: Focus restored to DataTable after popping modal
+2025-03-13 22:11:43,979 DEBUG: SwitchManagerApp received key event: right
+2025-03-13 22:11:43,980 DEBUG: Processing right key: switching to next command
+2025-03-13 22:11:43,980 DEBUG: SwitchManagerApp: Moving to next command
+2025-03-13 22:11:43,980 DEBUG: Refreshing command bar, active_command_index: 2
+2025-03-13 22:11:44,601 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:11:44,601 DEBUG: Processing enter key: executing command
+2025-03-13 22:11:44,601 DEBUG: Executing command 'traceroute' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:11:44,602 DEBUG: Traceroute command received; pushing StreamingOutputScreen for 192.168.10.1
+2025-03-13 22:11:44,602 DEBUG: Initializing StreamingOutputScreen with command: ['traceroute', '192.168.10.1']
+2025-03-13 22:11:44,603 DEBUG: Composing StreamingOutputScreen widgets
+2025-03-13 22:11:44,609 DEBUG: StreamingOutputScreen mounted, starting stream_output
+2025-03-13 22:11:44,630 DEBUG: Starting subprocess for command: ['traceroute', '192.168.10.1']
+2025-03-13 22:11:44,638 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:11:44,639 DEBUG: StreamingOutputScreen output line: traceroute to 192.168.10.1 (192.168.10.1), 64 hops max, 40 byte packets
+2025-03-13 22:11:44,662 DEBUG: StreamingOutputScreen output line: 1  router.lan (192.168.10.1)  9.065 ms  2.857 ms  2.720 ms
+2025-03-13 22:11:44,663 DEBUG: Subprocess finished in StreamingOutputScreen
+2025-03-13 22:11:47,251 DEBUG: StreamingOutputScreen received ESC key, setting close flag
+2025-03-13 22:11:47,251 DEBUG: SwitchManagerApp popping screen (modal closed)
+2025-03-13 22:11:47,291 DEBUG: StreamingOutputScreen unmounting, cancelling stream task if still running
+2025-03-13 22:11:47,593 DEBUG: Focus successfully restored to DataTable in StreamingOutputScreen
+2025-03-13 22:11:47,606 DEBUG: Focus restored to DataTable after popping modal
+2025-03-13 22:11:47,937 DEBUG: SwitchManagerApp received key event: right
+2025-03-13 22:11:47,938 DEBUG: Processing right key: switching to next command
+2025-03-13 22:11:47,938 DEBUG: SwitchManagerApp: Moving to next command
+2025-03-13 22:11:47,938 DEBUG: Refreshing command bar, active_command_index: 3
+2025-03-13 22:11:48,441 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:11:48,441 DEBUG: Processing enter key: executing command
+2025-03-13 22:11:48,441 DEBUG: Executing command 'details' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:11:48,441 DEBUG: Details command received; pushing OutputScreen
+2025-03-13 22:11:48,441 DEBUG: Initializing OutputScreen with output length: 140
+2025-03-13 22:11:48,442 DEBUG: Composing OutputScreen widgets
+2025-03-13 22:11:48,462 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:11:49,717 DEBUG: OutputScreen received ESC key, scheduling pop_screen
+2025-03-13 22:11:49,718 DEBUG: SwitchManagerApp popping screen (modal closed)
+2025-03-13 22:11:49,759 DEBUG: OutputScreen unmounting, restoring focus to DataTable
+2025-03-13 22:11:50,060 DEBUG: Focus successfully restored to DataTable in OutputScreen
+2025-03-13 22:11:50,073 DEBUG: Focus restored to DataTable after popping modal
+2025-03-13 22:11:51,535 DEBUG: SwitchManagerApp received key event: left
+2025-03-13 22:11:51,535 DEBUG: Processing left key: switching to previous command
+2025-03-13 22:11:51,535 DEBUG: SwitchManagerApp: Moving to previous command
+2025-03-13 22:11:51,535 DEBUG: Refreshing command bar, active_command_index: 2
+2025-03-13 22:11:51,718 DEBUG: SwitchManagerApp received key event: left
+2025-03-13 22:11:51,719 DEBUG: Processing left key: switching to previous command
+2025-03-13 22:11:51,719 DEBUG: SwitchManagerApp: Moving to previous command
+2025-03-13 22:11:51,719 DEBUG: Refreshing command bar, active_command_index: 1
+2025-03-13 22:11:51,877 DEBUG: SwitchManagerApp received key event: left
+2025-03-13 22:11:51,878 DEBUG: Processing left key: switching to previous command
+2025-03-13 22:11:51,878 DEBUG: SwitchManagerApp: Moving to previous command
+2025-03-13 22:11:51,878 DEBUG: Refreshing command bar, active_command_index: 0
+2025-03-13 22:11:53,051 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:11:53,052 DEBUG: Processing enter key: executing command
+2025-03-13 22:11:53,052 DEBUG: Executing command 'ssh' on IP: 192.168.10.1 (row index 0)
+2025-03-13 22:11:53,052 DEBUG: SSH command received; pushing SshScreen for 192.168.10.1
+2025-03-13 22:11:53,052 DEBUG: Initializing SshScreen for SSH to 192.168.10.1
+2025-03-13 22:11:53,053 DEBUG: Composing SshScreen widgets
+2025-03-13 22:11:53,060 DEBUG: SshScreen mounted, opening PTY and starting SSH process
+2025-03-13 22:11:53,090 DEBUG: SshScreen starting to read PTY output
+2025-03-13 22:11:53,092 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:11:56,852 DEBUG: SwitchManagerApp received key event: m
+2025-03-13 22:11:57,257 DEBUG: SwitchManagerApp received key event: i
+2025-03-13 22:11:57,700 DEBUG: SwitchManagerApp received key event: 7
+2025-03-13 22:12:05,882 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:12:05,882 DEBUG: Processing enter key: executing command
+2025-03-13 22:12:05,883 DEBUG: No row selected or filtered data is empty; aborting command execution
+2025-03-13 22:12:05,883 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:12:07,751 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 22:12:07,751 DEBUG: Processing enter key: executing command
+2025-03-13 22:12:07,751 DEBUG: No row selected or filtered data is empty; aborting command execution
+2025-03-13 22:12:07,751 DEBUG: No DataTable found to set focus after command execution
+2025-03-13 22:12:08,695 DEBUG: SshScreen received ESC key, terminating SSH session
+2025-03-13 22:12:08,903 DEBUG: SshScreen unmounting, cleaning up PTY and tasks
+2025-03-13 22:12:08,903 DEBUG: PTY read task cancelled in SshScreen on_unmount
+2025-03-13 22:12:09,205 DEBUG: No DataTable found in SshScreen on_unmount

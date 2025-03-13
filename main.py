@@ -11,7 +11,8 @@ from textual import events
 from textual.timer import Timer
 from textual.screen import Screen
 from textual.scroll_view import ScrollView
-from textual.css.query import NoMatches  # Import NoMatches exception
+from textual.css.query import NoMatches
+import pty  # Make sure this import is present for SSH modal
 
 # Check for SM_DEBUG environment variable (set to true to enable debug logging).
 SM_DEBUG = os.getenv("SM_DEBUG", "false").lower() == "true"
@@ -23,6 +24,8 @@ logging.basicConfig(
     level=log_level,
     format="%(asctime)s %(levelname)s: %(message)s"
 )
+
+# --- StreamingOutputScreen with container styling ---
 
 class StreamingOutputScreen(Screen):
     """A modal screen that streams command output as it is produced."""
@@ -36,8 +39,10 @@ class StreamingOutputScreen(Screen):
     
     def compose(self) -> ComposeResult:
         logging.debug("Composing StreamingOutputScreen widgets")
-        yield Static("Press ESC to close", id="modal_header")
-        yield ScrollView(Static("", id="output_text"), id="modal_body")
+        with Vertical(classes="modal-container"):
+            yield Static("Press ESC to close", id="modal_header", classes="modal-header")
+            yield ScrollView(Static("", id="output_text", classes="modal-text"),
+                             id="modal_body", classes="modal-body")
     
     async def on_mount(self) -> None:
         logging.debug("StreamingOutputScreen mounted, starting stream_output")
@@ -79,7 +84,6 @@ class StreamingOutputScreen(Screen):
         if event.key == "escape":
             logging.debug("StreamingOutputScreen received ESC key, setting close flag")
             self._closed = True
-            # Schedule the screen to be popped without awaiting it
             self.app.call_later(self.app.pop_screen)
             event.stop()
     
@@ -91,7 +95,6 @@ class StreamingOutputScreen(Screen):
                 await self._stream_task
             except asyncio.CancelledError:
                 logging.debug("Stream task cancelled in on_unmount")
-        # Restore focus after a short delay
         await asyncio.sleep(0.3)
         try:
             data_table = self.app.query(DataTable).first()
@@ -102,7 +105,8 @@ class StreamingOutputScreen(Screen):
             logging.debug("Focus successfully restored to DataTable in StreamingOutputScreen")
         else:
             logging.debug("No DataTable found in StreamingOutputScreen on_unmount")
-            
+
+# --- OutputScreen with container styling ---
 
 class OutputScreen(Screen):
     """A modal screen to display immediate output (or details)."""
@@ -113,7 +117,6 @@ class OutputScreen(Screen):
     
     def compose(self) -> ComposeResult:
         logging.debug("Composing OutputScreen widgets")
-        # Wrap content in a styled container
         with Vertical(classes="modal-container"):
             yield Static("Press ESC to close", id="modal_header", classes="modal-header")
             yield ScrollView(
@@ -139,7 +142,108 @@ class OutputScreen(Screen):
             logging.debug("Focus successfully restored to DataTable in OutputScreen")
         else:
             logging.debug("No DataTable found in OutputScreen on_unmount")
-            
+
+# --- New SshScreen with container styling ---
+
+class SshScreen(Screen):
+    """A modal screen that acts as an interactive SSH window."""
+    def __init__(self, ip: str, **kwargs):
+        logging.debug(f"Initializing SshScreen for SSH to {ip}")
+        self.ip = ip
+        self.master_fd = None
+        self.slave_fd = None
+        self.ssh_proc = None
+        self._read_task = None
+        super().__init__(**kwargs)
+    
+    def compose(self) -> ComposeResult:
+        logging.debug("Composing SshScreen widgets")
+        with Vertical(classes="modal-container"):
+            yield Static(f"SSH session to {self.ip} - Press ESC to close", id="modal_header", classes="modal-header")
+            yield ScrollView(Static("", id="ssh_output", classes="modal-text"), 
+                             id="modal_body", classes="modal-body")
+            yield Input(placeholder="Type command...", id="ssh_input")
+    
+    async def on_mount(self) -> None:
+        logging.debug("SshScreen mounted, opening PTY and starting SSH process")
+        self.master_fd, self.slave_fd = pty.openpty()
+        self.ssh_proc = await asyncio.create_subprocess_exec(
+            "ssh", self.ip,
+            stdin=self.slave_fd,
+            stdout=self.slave_fd,
+            stderr=self.slave_fd,
+            close_fds=True
+        )
+        self._read_task = asyncio.create_task(self.read_pty_output())
+    
+    async def read_pty_output(self) -> None:
+        logging.debug("SshScreen starting to read PTY output")
+        master_file = os.fdopen(self.master_fd, "rb", buffering=0)
+        try:
+            output_widget = self.query("Static#ssh_output").first()
+        except Exception:
+            output_widget = None
+            logging.debug("No ssh_output widget found in SshScreen")
+        while True:
+            try:
+                data = await asyncio.to_thread(master_file.read, 1024)
+            except Exception as e:
+                logging.debug(f"Error reading from PTY: {e}")
+                break
+            if not data:
+                break
+            text = data.decode(errors="ignore")
+            if output_widget:
+                # Append new text to the existing output.
+                current = output_widget.renderable if output_widget.renderable is not None else ""
+                output_widget.update(current + text)
+        logging.debug("SSH process output reading finished")
+        self.app.call_later(self.app.pop_screen)
+    
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        if self.master_fd is not None:
+            command = event.value + "\n"
+            os.write(self.master_fd, command.encode())
+            try:
+                input_widget = self.query("Input#ssh_input").first()
+                input_widget.value = ""
+            except Exception:
+                pass
+    
+    async def on_key(self, event: events.Key) -> None:
+        if event.key == "escape":
+            logging.debug("SshScreen received ESC key, terminating SSH session")
+            if self.ssh_proc:
+                self.ssh_proc.kill()
+            self.app.call_later(self.app.pop_screen)
+            event.stop()
+    
+    async def on_unmount(self) -> None:
+        logging.debug("SshScreen unmounting, cleaning up PTY and tasks")
+        if self._read_task and not self._read_task.done():
+            self._read_task.cancel()
+            try:
+                await self._read_task
+            except asyncio.CancelledError:
+                logging.debug("PTY read task cancelled in SshScreen on_unmount")
+        if self.slave_fd:
+            os.close(self.slave_fd)
+        if self.master_fd:
+            os.close(self.master_fd)
+        await asyncio.sleep(0.3)
+        try:
+            data_table = self.app.query(DataTable).first()
+        except Exception:
+            data_table = None
+        if data_table:
+            self.app.set_focus(data_table)
+            logging.debug("Focus restored to DataTable in SshScreen")
+        else:
+            logging.debug("No DataTable found in SshScreen on_unmount")
+
+
+# --- SwitchManagerApp remains largely the same ---
+
 class SwitchManagerApp(App):
     CSS_PATH = "switch_manager.css"
     BINDINGS = [
@@ -280,10 +384,8 @@ class SwitchManagerApp(App):
             logging.debug("Exit command received; exiting application")
             self.exit()
         elif command == "ssh":
-            logging.debug(f"SSH command received; exiting TUI and connecting to {ip}")
-            self.exit()
-            os.system("clear")  # Clear the terminal screen
-            os.system(f"ssh {ip}")
+            logging.debug(f"SSH command received; pushing SshScreen for {ip}")
+            await self.push_screen(SshScreen(ip))
         elif command == "ping":
             logging.debug(f"Ping command received; pushing StreamingOutputScreen for {ip}")
             await self.push_screen(StreamingOutputScreen(["ping", "-c", "4", ip]))
