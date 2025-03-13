@@ -11,75 +11,135 @@ from textual import events
 from textual.timer import Timer
 from textual.screen import Screen
 from textual.scroll_view import ScrollView
+from textual.css.query import NoMatches  # Import NoMatches exception
 
-logging.basicConfig(filename="textual.log", level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
+# Check for SM_DEBUG environment variable (set to true to enable debug logging).
+SM_DEBUG = os.getenv("SM_DEBUG", "false").lower() == "true"
+log_filename = "switch-manager.log" if SM_DEBUG else "textual.log"
+log_level = logging.DEBUG if SM_DEBUG else logging.INFO
+
+logging.basicConfig(
+    filename=log_filename,
+    level=log_level,
+    format="%(asctime)s %(levelname)s: %(message)s"
+)
 
 class StreamingOutputScreen(Screen):
     """A modal screen that streams command output as it is produced."""
     def __init__(self, cmd: list, **kwargs):
+        logging.debug(f"Initializing StreamingOutputScreen with command: {cmd}")
         self.cmd = cmd
         self.output = ""
+        self._stream_task = None
+        self._closed = False  # Flag to signal that the modal should close
         super().__init__(**kwargs)
     
     def compose(self) -> ComposeResult:
+        logging.debug("Composing StreamingOutputScreen widgets")
         yield Static("Press ESC to close", id="modal_header")
         yield ScrollView(Static("", id="output_text"), id="modal_body")
     
     async def on_mount(self) -> None:
-        asyncio.create_task(self.stream_output())
+        logging.debug("StreamingOutputScreen mounted, starting stream_output")
+        self._stream_task = asyncio.create_task(self.stream_output())
     
     async def stream_output(self) -> None:
+        logging.debug(f"Starting subprocess for command: {self.cmd}")
         proc = await asyncio.create_subprocess_exec(
             *self.cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT
         )
-        output_widget = self.query_one("#output_text", Static)
-        while True:
-            line = await proc.stdout.readline()
-            if not line:
-                break
-            decoded = line.decode()
-            self.output += decoded
-            output_widget.update(self.output)
+        try:
+            output_widget = self.query("Static#output_text").first()
+        except Exception:
+            output_widget = None
+            logging.debug("No output_text widget found in StreamingOutputScreen")
+        try:
+            while True:
+                if self._closed:
+                    logging.debug("stream_output detected close flag; breaking out of loop")
+                    break
+                line = await proc.stdout.readline()
+                if not line:
+                    break
+                decoded = line.decode()
+                logging.debug(f"StreamingOutputScreen output line: {decoded.strip()}")
+                self.output += decoded
+                if output_widget:
+                    output_widget.update(self.output)
+        except asyncio.CancelledError:
+            logging.debug("stream_output task was cancelled")
+            proc.kill()
+            raise
         await proc.wait()
+        logging.debug("Subprocess finished in StreamingOutputScreen")
     
     async def on_key(self, event: events.Key) -> None:
         if event.key == "escape":
-            await self.app.pop_screen()
+            logging.debug("StreamingOutputScreen received ESC key, setting close flag")
+            self._closed = True
+            # Schedule the screen to be popped without awaiting it
+            self.app.call_later(self.app.pop_screen)
             event.stop()
     
     async def on_unmount(self) -> None:
-        # Wait a bit and restore focus to the main DataTable.
+        logging.debug("StreamingOutputScreen unmounting, cancelling stream task if still running")
+        if self._stream_task and not self._stream_task.done():
+            self._stream_task.cancel()
+            try:
+                await self._stream_task
+            except asyncio.CancelledError:
+                logging.debug("Stream task cancelled in on_unmount")
+        # Restore focus after a short delay
         await asyncio.sleep(0.3)
         try:
-            self.app.set_focus(self.app.query_one(DataTable))
-        except Exception as e:
-            self.app.log(f"Focus restoration error (streaming): {e}")
+            data_table = self.app.query(DataTable).first()
+        except Exception:
+            data_table = None
+        if data_table:
+            self.app.set_focus(data_table)
+            logging.debug("Focus successfully restored to DataTable in StreamingOutputScreen")
+        else:
+            logging.debug("No DataTable found in StreamingOutputScreen on_unmount")
+            
 
 class OutputScreen(Screen):
     """A modal screen to display immediate output (or details)."""
     def __init__(self, output_text: str, **kwargs):
+        logging.debug(f"Initializing OutputScreen with output length: {len(output_text)}")
         self.output_text = output_text
         super().__init__(**kwargs)
     
     def compose(self) -> ComposeResult:
-        yield Static("Press ESC to close", id="modal_header")
-        yield ScrollView(Static(self.output_text, id="output_text"), id="modal_body")
+        logging.debug("Composing OutputScreen widgets")
+        # Wrap content in a styled container
+        with Vertical(classes="modal-container"):
+            yield Static("Press ESC to close", id="modal_header", classes="modal-header")
+            yield ScrollView(
+                Static(self.output_text, id="output_text", classes="modal-text"),
+                id="modal_body", classes="modal-body"
+            )
     
     async def on_key(self, event: events.Key) -> None:
         if event.key == "escape":
-            await self.app.pop_screen()
+            logging.debug("OutputScreen received ESC key, scheduling pop_screen")
+            self.app.call_later(self.app.pop_screen)
             event.stop()
     
     async def on_unmount(self) -> None:
-        # Wait a bit and restore focus to the main DataTable.
+        logging.debug("OutputScreen unmounting, restoring focus to DataTable")
         await asyncio.sleep(0.3)
         try:
-            self.app.set_focus(self.app.query_one(DataTable))
-        except Exception as e:
-            self.app.log(f"Focus restoration error (output): {e}")
-
+            data_table = self.app.query(DataTable).first()
+        except Exception:
+            data_table = None
+        if data_table:
+            self.app.set_focus(data_table)
+            logging.debug("Focus successfully restored to DataTable in OutputScreen")
+        else:
+            logging.debug("No DataTable found in OutputScreen on_unmount")
+            
 class SwitchManagerApp(App):
     CSS_PATH = "switch_manager.css"
     BINDINGS = [
@@ -88,15 +148,17 @@ class SwitchManagerApp(App):
     ]
     
     def __init__(self, csv_path: str, **kwargs):
+        logging.debug(f"Initializing SwitchManagerApp with CSV path: {csv_path}")
         super().__init__(**kwargs)
         self.csv_path = csv_path
         self.data = []          # All rows loaded from CSV.
         self.filtered_data = [] # Filtered rows.
-        self.commands = ["ssh", "ping", "traceroute", "detail", "exit"]
+        self.commands = ["ssh", "ping", "traceroute", "details", "exit"]
         self.active_command_index = 0
         self.status_timer: Timer | None = None
     
     def compose(self) -> ComposeResult:
+        logging.debug("Composing main SwitchManagerApp widgets")
         yield Static("Switch Manager", id="title", classes="center")
         with Vertical(id="main_container"):
             with Horizontal(id="command_bar"):
@@ -109,24 +171,42 @@ class SwitchManagerApp(App):
             yield Static("", id="status", classes="status")
     
     def on_mount(self) -> None:
+        logging.debug("SwitchManagerApp mounting: loading CSV and updating table")
         self.load_csv()
         self.update_table(self.data)
-        table = self.query_one(DataTable)
-        table.cursor_type = "row"
-        table.focus()
+        try:
+            table = self.query(DataTable).first()
+        except NoMatches:
+            table = None
+        if table:
+            table.cursor_type = "row"
+            table.focus()
+            logging.debug("DataTable focused in SwitchManagerApp on_mount")
+        else:
+            logging.debug("No DataTable found in on_mount")
     
     def load_csv(self) -> None:
+        logging.debug("Loading CSV data")
         csv_file = Path(self.csv_path)
         if csv_file.exists():
             with csv_file.open("r", newline="", encoding="utf-8") as f:
                 reader = csv.DictReader(f, delimiter=";")
                 self.data = [{k.strip(): v for k, v in row.items()} for row in reader]
+            logging.debug(f"CSV loaded with {len(self.data)} rows")
         else:
+            logging.debug("CSV file does not exist; no data loaded")
             self.data = []
         self.filtered_data = self.data.copy()
     
     def update_table(self, rows) -> None:
-        table = self.query_one(DataTable)
+        logging.debug(f"Updating table with {len(rows)} rows")
+        try:
+            table = self.query(DataTable).first()
+        except NoMatches:
+            table = None
+        if not table:
+            logging.debug("No DataTable found when updating table")
+            return
         table.clear(columns=True)
         table.add_columns("Name", "IP", "subnet", "Alias", "comment")
         for row in rows:
@@ -139,87 +219,129 @@ class SwitchManagerApp(App):
             )
     
     def action_prev_command(self) -> None:
+        logging.debug("SwitchManagerApp: Moving to previous command")
         self.active_command_index = (self.active_command_index - 1) % len(self.commands)
         self.refresh_command_bar()
     
     def action_next_command(self) -> None:
+        logging.debug("SwitchManagerApp: Moving to next command")
         self.active_command_index = (self.active_command_index + 1) % len(self.commands)
         self.refresh_command_bar()
     
     def refresh_command_bar(self) -> None:
+        logging.debug(f"Refreshing command bar, active_command_index: {self.active_command_index}")
         for i, _ in enumerate(self.commands):
-            widget = self.query_one(f"#cmd-{i}", Static)
-            if i == self.active_command_index:
-                widget.add_class("active")
-            else:
-                widget.remove_class("active")
+            try:
+                widget = self.query(f"#cmd-{i}").first()
+            except NoMatches:
+                widget = None
+            if widget:
+                if i == self.active_command_index:
+                    widget.add_class("active")
+                else:
+                    widget.remove_class("active")
     
     def action_move_up(self) -> None:
-        table = self.query_one(DataTable)
-        if table.row_count > 0:
+        try:
+            table = self.query(DataTable).first()
+        except NoMatches:
+            table = None
+        if table and table.row_count > 0:
+            logging.debug("SwitchManagerApp: Moving cursor up in DataTable")
             table.action_cursor_up()
     
     def action_move_down(self) -> None:
-        table = self.query_one(DataTable)
-        if table.row_count > 0:
+        try:
+            table = self.query(DataTable).first()
+        except NoMatches:
+            table = None
+        if table and table.row_count > 0:
+            logging.debug("SwitchManagerApp: Moving cursor down in DataTable")
             table.action_cursor_down()
     
     async def action_execute_command(self) -> None:
-        table = self.query_one(DataTable)
-        if table.cursor_row is None or not self.filtered_data:
+        try:
+            table = self.query(DataTable).first()
+        except NoMatches:
+            table = None
+        if table is None or table.cursor_row is None or not self.filtered_data:
+            logging.debug("No row selected or filtered data is empty; aborting command execution")
             return
         row_index = table.cursor_row
         if row_index >= len(self.filtered_data):
+            logging.debug("Cursor row index out of range; aborting command execution")
             return
         row_data = self.filtered_data[row_index]
         ip = row_data.get("IP", "").strip()
         command = self.commands[self.active_command_index]
+        logging.debug(f"Executing command '{command}' on IP: {ip} (row index {row_index})")
         
         if command == "exit":
+            logging.debug("Exit command received; exiting application")
             self.exit()
         elif command == "ssh":
+            logging.debug(f"SSH command received; exiting TUI and connecting to {ip}")
             self.exit()
             os.system("clear")  # Clear the terminal screen
             os.system(f"ssh {ip}")
-           # self.exit()  # exit the TUI first
-           # import pty
-           # pty.spawn(["ssh", ip])
         elif command == "ping":
+            logging.debug(f"Ping command received; pushing StreamingOutputScreen for {ip}")
             await self.push_screen(StreamingOutputScreen(["ping", "-c", "4", ip]))
         elif command == "traceroute":
+            logging.debug(f"Traceroute command received; pushing StreamingOutputScreen for {ip}")
             await self.push_screen(StreamingOutputScreen(["traceroute", ip]))
-        elif command == "detail":
+        elif command == "details":
             details = "\n".join([f"{k}: {v}" for k, v in row_data.items()])
+            logging.debug("Details command received; pushing OutputScreen")
             await self.push_screen(OutputScreen(details))
     
     def clear_status(self) -> None:
-        status_widget = self.query_one("#status", Static)
-        status_widget.update("")
+        logging.debug("Clearing status message")
+        try:
+            status_widget = self.query("#status").first()
+        except NoMatches:
+            status_widget = None
+        if status_widget:
+            status_widget.update("")
     
     async def on_key(self, event: events.Key) -> None:
+        logging.debug(f"SwitchManagerApp received key event: {event.key}")
         if event.key in ("left", "right"):
             if event.key == "left":
+                logging.debug("Processing left key: switching to previous command")
                 self.action_prev_command()
             else:
+                logging.debug("Processing right key: switching to next command")
                 self.action_next_command()
             event.stop()
             return
         
         if event.key == "enter":
+            logging.debug("Processing enter key: executing command")
             await self.action_execute_command()
             try:
-                self.query_one(DataTable).focus()
-            except Exception:
-                pass
+                table = self.query(DataTable).first()
+            except NoMatches:
+                table = None
+            if table:
+                table.focus()
+                logging.debug("DataTable focused after command execution")
+            else:
+                logging.debug("No DataTable found to set focus after command execution")
             event.stop()
             return
         
         if event.character and event.character.isprintable():
-            search_input = self.query_one("#search_input", Input)
-            if not search_input.has_focus:
+            try:
+                search_input = self.query("#search_input").first()
+            except NoMatches:
+                search_input = None
+            if search_input and not search_input.has_focus:
+                logging.debug("Transferring focus to search_input due to printable key press")
                 search_input.focus()
     
     def on_input_changed(self, event: Input.Changed) -> None:
+        logging.debug(f"Search input changed: {event.value}")
         search_text = event.value.lower()
         if search_text == "":
             self.filtered_data = self.data.copy()
@@ -232,16 +354,23 @@ class SwitchManagerApp(App):
                     search_text in row.get("aliases", row.get("Alias", "")).lower() or 
                     search_text in row.get("comment", row.get("Comment", "")).lower())
             ]
+        logging.debug(f"{len(self.filtered_data)} rows match search text")
         self.update_table(self.filtered_data)
 
     async def pop_screen(self) -> None:
+        logging.debug("SwitchManagerApp popping screen (modal closed)")
         await super().pop_screen()
-        # Immediately restore focus to the DataTable after a modal is popped.
         try:
-            self.set_focus(self.query_one(DataTable))
-        except Exception as e:
-            self.log(f"Error restoring focus: {e}")
+            table = self.query(DataTable).first()
+        except NoMatches:
+            table = None
+        if table:
+            self.set_focus(table)
+            logging.debug("Focus restored to DataTable after popping modal")
+        else:
+            logging.debug("No DataTable found after popping modal")
 
 if __name__ == "__main__":
+    logging.debug("Starting SwitchManagerApp")
     app = SwitchManagerApp(csv_path="data.csv")
     app.run()
