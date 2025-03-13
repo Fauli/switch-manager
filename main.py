@@ -3,6 +3,7 @@ import csv
 import os
 import subprocess
 import logging
+import sys
 from pathlib import Path
 from textual.app import App, ComposeResult
 from textual.widgets import Static, DataTable, Input
@@ -11,18 +12,23 @@ from textual import events
 from textual.timer import Timer
 from textual.screen import Screen
 from textual.scroll_view import ScrollView
-from textual.css.query import NoMatches  # Import NoMatches exception
+from textual.css.query import NoMatches
 
-# Check for SM_DEBUG environment variable (set to true to enable debug logging).
-SM_DEBUG = os.getenv("SM_DEBUG", "false").lower() == "true"
-log_filename = "switch-manager.log" if SM_DEBUG else "textual.log"
-log_level = logging.DEBUG if SM_DEBUG else logging.INFO
+# Configure logging: if SM_DEBUG is true, log debug messages to file;
+# otherwise, only warnings are printed.
+SM_DEBUG = os.environ.get("SM_DEBUG", "false").lower() == "true"
+if SM_DEBUG:
+    logging.basicConfig(
+        filename="switch-manager.log",
+        level=logging.DEBUG,
+        format="%(asctime)s %(levelname)s: %(message)s"
+    )
+else:
+    logging.basicConfig(
+        level=logging.WARNING,
+        format="%(asctime)s %(levelname)s: %(message)s"
+    )
 
-logging.basicConfig(
-    filename=log_filename,
-    level=log_level,
-    format="%(asctime)s %(levelname)s: %(message)s"
-)
 
 class StreamingOutputScreen(Screen):
     """A modal screen that streams command output as it is produced."""
@@ -36,8 +42,10 @@ class StreamingOutputScreen(Screen):
     
     def compose(self) -> ComposeResult:
         logging.debug("Composing StreamingOutputScreen widgets")
-        yield Static("Press ESC to close", id="modal_header")
-        yield ScrollView(Static("", id="output_text"), id="modal_body")
+        with Vertical(classes="modal-container"):
+            yield Static("Press ESC to close", id="modal_header", classes="modal-header")
+            yield ScrollView(Static("", id="output_text", classes="modal-text"),
+                             id="modal_body", classes="modal-body")
     
     async def on_mount(self) -> None:
         logging.debug("StreamingOutputScreen mounted, starting stream_output")
@@ -79,7 +87,6 @@ class StreamingOutputScreen(Screen):
         if event.key == "escape":
             logging.debug("StreamingOutputScreen received ESC key, setting close flag")
             self._closed = True
-            # Schedule the screen to be popped without awaiting it
             self.app.call_later(self.app.pop_screen)
             event.stop()
     
@@ -91,7 +98,6 @@ class StreamingOutputScreen(Screen):
                 await self._stream_task
             except asyncio.CancelledError:
                 logging.debug("Stream task cancelled in on_unmount")
-        # Restore focus after a short delay
         await asyncio.sleep(0.3)
         try:
             data_table = self.app.query(DataTable).first()
@@ -102,7 +108,7 @@ class StreamingOutputScreen(Screen):
             logging.debug("Focus successfully restored to DataTable in StreamingOutputScreen")
         else:
             logging.debug("No DataTable found in StreamingOutputScreen on_unmount")
-            
+
 
 class OutputScreen(Screen):
     """A modal screen to display immediate output (or details)."""
@@ -113,7 +119,6 @@ class OutputScreen(Screen):
     
     def compose(self) -> ComposeResult:
         logging.debug("Composing OutputScreen widgets")
-        # Wrap content in a styled container
         with Vertical(classes="modal-container"):
             yield Static("Press ESC to close", id="modal_header", classes="modal-header")
             yield ScrollView(
@@ -139,7 +144,8 @@ class OutputScreen(Screen):
             logging.debug("Focus successfully restored to DataTable in OutputScreen")
         else:
             logging.debug("No DataTable found in OutputScreen on_unmount")
-            
+
+
 class SwitchManagerApp(App):
     CSS_PATH = "switch_manager.css"
     BINDINGS = [
@@ -280,10 +286,9 @@ class SwitchManagerApp(App):
             logging.debug("Exit command received; exiting application")
             self.exit()
         elif command == "ssh":
-            logging.debug(f"SSH command received; exiting TUI and connecting to {ip}")
-            self.exit()
-            os.system("clear")  # Clear the terminal screen
-            os.system(f"ssh {ip}")
+            logging.debug(f"SSH command received; launching external SSH terminal for {ip}")
+            # Option 1: Launch an external terminal emulator for SSH.
+            launch_external_ssh(ip)
         elif command == "ping":
             logging.debug(f"Ping command received; pushing StreamingOutputScreen for {ip}")
             await self.push_screen(StreamingOutputScreen(["ping", "-c", "4", ip]))
@@ -356,7 +361,7 @@ class SwitchManagerApp(App):
             ]
         logging.debug(f"{len(self.filtered_data)} rows match search text")
         self.update_table(self.filtered_data)
-
+    
     async def pop_screen(self) -> None:
         logging.debug("SwitchManagerApp popping screen (modal closed)")
         await super().pop_screen()
@@ -369,6 +374,27 @@ class SwitchManagerApp(App):
             logging.debug("Focus restored to DataTable after popping modal")
         else:
             logging.debug("No DataTable found after popping modal")
+
+
+
+def launch_external_ssh(ip: str):
+    username = os.environ.get("SM_USER", "")
+    if sys.platform.startswith("darwin"):
+        # macOS: use AppleScript to tell Terminal to open a new window.
+        script = f'''
+        tell application "Terminal"
+            do script "ssh {username}@{ip}"
+            activate
+        end tell
+        '''
+        subprocess.Popen(["osascript", "-e", script])
+    elif sys.platform.startswith("linux"):
+        subprocess.Popen(["xterm", "-e", "ssh", f"{username}@{ip}"])
+    elif sys.platform.startswith("win"):
+        subprocess.Popen(["start", "cmd", "/k", f"ssh {username}@{ip}"], shell=True)
+    else:
+        raise NotImplementedError("Platform not supported")
+
 
 if __name__ == "__main__":
     logging.debug("Starting SwitchManagerApp")
