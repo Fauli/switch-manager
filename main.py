@@ -29,33 +29,6 @@ else:
         format="%(asctime)s %(levelname)s: %(message)s"
     )
 
-###############################################################################
-# A simple function that launches an external terminal emulator to run SSH.
-###############################################################################
-
-def launch_external_ssh(ip: str):
-    username = os.environ.get("SM_USER", "")
-    if sys.platform.startswith("darwin"):
-        # macOS: use AppleScript to tell Terminal.app to open a new window.
-        script = f'''
-        tell application "Terminal"
-            do script "ssh {username}@{ip}"
-            activate
-        end tell
-        '''
-        subprocess.Popen(["osascript", "-e", script])
-    elif sys.platform.startswith("linux"):
-        # Linux: try xterm; adjust to your favorite terminal if needed.
-        subprocess.Popen(["xterm", "-e", "ssh", f"{username}@{ip}"])
-    elif sys.platform.startswith("win"):
-        # Windows: you might use 'start' (if ssh is in PATH) or PuTTY.
-        subprocess.Popen(["start", "cmd", "/k", f"ssh {username}@{ip}"], shell=True)
-    else:
-        raise NotImplementedError("Platform not supported")
-
-###############################################################################
-# Existing modals (StreamingOutputScreen and OutputScreen) remain unchanged.
-###############################################################################
 
 class StreamingOutputScreen(Screen):
     """A modal screen that streams command output as it is produced."""
@@ -172,9 +145,6 @@ class OutputScreen(Screen):
         else:
             logging.debug("No DataTable found in OutputScreen on_unmount")
 
-###############################################################################
-# Main Application: SwitchManagerApp
-###############################################################################
 
 class SwitchManagerApp(App):
     CSS_PATH = "switch_manager.css"
@@ -406,9 +376,6 @@ class SwitchManagerApp(App):
             logging.debug("No DataTable found after popping modal")
 
 
-###############################################################################
-# Option 1: Launch external SSH terminal emulator.
-###############################################################################
 
 def launch_external_ssh(ip: str):
     username = os.environ.get("SM_USER", "")

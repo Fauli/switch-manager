@@ -65,3 +65,18 @@
 2025-03-13 23:48:03,528 DEBUG: SwitchManagerApp received key event: down
 2025-03-13 23:48:03,692 DEBUG: SwitchManagerApp received key event: down
 2025-03-13 23:48:05,209 DEBUG: SwitchManagerApp received key event: down
+2025-03-13 23:49:47,932 DEBUG: Starting SwitchManagerApp
+2025-03-13 23:49:47,932 DEBUG: Initializing SwitchManagerApp with CSV path: data.csv
+2025-03-13 23:49:47,934 DEBUG: Using selector: KqueueSelector
+2025-03-13 23:49:47,940 DEBUG: Composing main SwitchManagerApp widgets
+2025-03-13 23:49:47,945 DEBUG: SwitchManagerApp mounting: loading CSV and updating table
+2025-03-13 23:49:47,945 DEBUG: Loading CSV data
+2025-03-13 23:49:47,946 DEBUG: CSV loaded with 56 rows
+2025-03-13 23:49:47,946 DEBUG: Updating table with 56 rows
+2025-03-13 23:49:47,947 DEBUG: DataTable focused in SwitchManagerApp on_mount
+2025-03-13 23:49:48,809 DEBUG: SwitchManagerApp received key event: down
+2025-03-13 23:49:49,117 DEBUG: SwitchManagerApp received key event: enter
+2025-03-13 23:49:49,118 DEBUG: Processing enter key: executing command
+2025-03-13 23:49:49,118 DEBUG: Executing command 'ssh' on IP: 192.168.10.17 (row index 1)
+2025-03-13 23:49:49,118 DEBUG: SSH command received; launching external SSH terminal for 192.168.10.17
+2025-03-13 23:49:49,125 DEBUG: DataTable focused after command execution
