@@ -76,3 +76,35 @@ Screen {
     max-height: 1;
     padding: 0 1;
 }
+
+/* Style for the modal container */
+.modal-container {
+    /* padding: 2 4; */
+    margin: 1;
+    /* width: 80%; */
+    /* border: round #444444;
+    background: #555555; */
+}
+
+/* Header styling for the modal */
+.modal-header {
+    text-align: center;
+    padding: 1;
+    background: #007acc;
+    color: lightgrey;
+}
+
+/* Body styling for the modal */
+.modal-body {
+    padding: 1;
+    margin-top: 1;
+    /* Optionally center the content vertically if needed */
+    /* align: center middle; */
+}
+
+/* Text styling within the modal */
+.modal-text {
+    padding: 1;
+    /* text-align: center; */
+    overflow-y: auto;
+}
