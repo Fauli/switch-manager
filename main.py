@@ -151,7 +151,6 @@ class SwitchManagerApp(App):
     BINDINGS = [
         ("up", "move_up", "Move Up"),
         ("down", "move_down", "Move Down"),
-        ("ctrl+h", "show_help", "Show Help"),  # New key binding for help
     ]
     
     def __init__(self, csv_path: str, **kwargs):
@@ -160,7 +159,8 @@ class SwitchManagerApp(App):
         self.csv_path = csv_path
         self.data = []          # All rows loaded from CSV.
         self.filtered_data = [] # Filtered rows.
-        self.commands = ["ssh", "ping", "traceroute", "details", "exit"]
+        # Added "help" as one of the commands.
+        self.commands = ["ssh", "ping", "traceroute", "details", "help", "exit"]
         self.active_command_index = 0
         self.status_timer: Timer | None = None
     
@@ -172,7 +172,6 @@ class SwitchManagerApp(App):
                 for i, cmd in enumerate(self.commands):
                     css_class = "command active" if i == self.active_command_index else "command"
                     yield Static(cmd, id=f"cmd-{i}", classes=css_class)
-                yield Static("Help: Ctrl+h", classes="help")
             yield Input(placeholder="Search...", id="search_input")
             with Vertical(id="table_container"):
                 yield DataTable(id="data_table")
@@ -289,7 +288,6 @@ class SwitchManagerApp(App):
             self.exit()
         elif command == "ssh":
             logging.debug(f"SSH command received; launching external SSH terminal for {ip}")
-            # Option 1: Launch an external terminal emulator for SSH.
             launch_external_ssh(ip)
         elif command == "ping":
             logging.debug(f"Ping command received; pushing StreamingOutputScreen for {ip}")
@@ -301,40 +299,28 @@ class SwitchManagerApp(App):
             details = "\n".join([f"{k}: {v}" for k, v in row_data.items()])
             logging.debug("Details command received; pushing OutputScreen")
             await self.push_screen(OutputScreen(details))
-    
-    async def action_show_help(self) -> None:
-        """Show help information when ctrl+h is pressed."""
-        help_text = (
-            r" ____   ____        .____    .__ "+"\n"
-            r" \   \ /   /        |    |   |__|"+"\n"
-            r"  \   Y   /  ______ |    |   |  |"+"\n"
-            r"   \     /  /_____/ |    |___|  |"+"\n"
-            r"    \___/           |_______ \__|"+"\n"
-            r"                            \/   "+"\n"
-            r"                                 "+"\n"
-            "      V-Li: Switch Manager\n\n"
-            " - Use UP/DOWN arrows to navigate the table.\n"
-            " - Use LEFT/RIGHT arrows to switch commands.\n"
-            " - Press ENTER to execute the selected command.\n"
-            " - Use the search input to filter the table rows.\n"
-            " - Press CTRL+H to show this help screen.\n"
-            " - In any modal, press ESC to close it."
-            " \n\n\n"
-            " For feature requests or bug reports, please contact the developer."
-            " \n\n\n"
-            " ¬ Created by Franz, 2025"
-        )
-        logging.debug("Showing help screen with static help text")
-        await self.push_screen(OutputScreen(help_text))
-    
-    def clear_status(self) -> None:
-        logging.debug("Clearing status message")
-        try:
-            status_widget = self.query("#status").first()
-        except NoMatches:
-            status_widget = None
-        if status_widget:
-            status_widget.update("")
+        elif command == "help":
+            # Show the help modal.
+            help_text = (
+                r" ____   ____        .____    .__ "+"\n"
+                r" \   \ /   /        |    |   |__|"+"\n"
+                r"  \   Y   /  ______ |    |   |  |"+"\n"
+                r"   \     /  /_____/ |    |___|  |"+"\n"
+                r"    \___/           |_______ \__|"+"\n"
+                r"                            \/   "+"\n"
+                r"                                 "+"\n"
+                "      V-Li: Switch Manager\n\n"
+                " - Use UP/DOWN arrows to navigate the table.\n"
+                " - Use LEFT/RIGHT arrows to switch commands.\n"
+                " - Press ENTER to execute the selected command.\n"
+                " - Use the search input to filter the table rows.\n"
+                " - Select the Help command to view this information.\n"
+                " - In any modal, press ESC to close it.\n\n"
+                " For feature requests or bug reports, please contact the developer.\n\n"
+                " ¬ Created by Franz, 2025"
+            )
+            logging.debug("Help command received; showing help screen")
+            await self.push_screen(OutputScreen(help_text))
     
     async def on_key(self, event: events.Key) -> None:
         logging.debug(f"SwitchManagerApp received key event: {event.key}")
@@ -406,7 +392,6 @@ class SwitchManagerApp(App):
 def launch_external_ssh(ip: str):
     username = os.environ.get("SM_USER", "")
     if sys.platform.startswith("darwin"):
-        # macOS: use AppleScript to tell Terminal to open a new window.
         script = f'''
         tell application "Terminal"
             do script "ssh {username}@{ip}"

@@ -1,4 +1,4 @@
-# Switch Manager
+# V-Li: Switch Manager
 
 <p align="center">
     <img src="images/switch-manager-logo.png" alt="Switch Manager Image" width="300" height="300">
