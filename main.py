@@ -151,6 +151,7 @@ class SwitchManagerApp(App):
     BINDINGS = [
         ("up", "move_up", "Move Up"),
         ("down", "move_down", "Move Down"),
+        ("ctrl+h", "show_help", "Show Help"),  # New key binding for help
     ]
     
     def __init__(self, csv_path: str, **kwargs):
@@ -171,6 +172,7 @@ class SwitchManagerApp(App):
                 for i, cmd in enumerate(self.commands):
                     css_class = "command active" if i == self.active_command_index else "command"
                     yield Static(cmd, id=f"cmd-{i}", classes=css_class)
+                yield Static("Help: Ctrl+h", classes="help")
             yield Input(placeholder="Search...", id="search_input")
             with Vertical(id="table_container"):
                 yield DataTable(id="data_table")
@@ -300,6 +302,22 @@ class SwitchManagerApp(App):
             logging.debug("Details command received; pushing OutputScreen")
             await self.push_screen(OutputScreen(details))
     
+    async def action_show_help(self) -> None:
+        """Show help information when ctrl+h is pressed."""
+        help_text = (
+            "Switch Manager:\n\n"
+            "- Use UP/DOWN arrows to navigate the table.\n"
+            "- Use LEFT/RIGHT arrows to switch commands.\n"
+            "- Press ENTER to execute the selected command.\n"
+            "- Use the search input to filter the table rows.\n"
+            "- Press CTRL+H to show this help screen.\n"
+            "- In any modal, press ESC to close it."
+            "\n\n\n"
+            "Created by Franz, 2025"
+        )
+        logging.debug("Showing help screen with static help text")
+        await self.push_screen(OutputScreen(help_text))
+    
     def clear_status(self) -> None:
         logging.debug("Clearing status message")
         try:
@@ -374,7 +392,6 @@ class SwitchManagerApp(App):
             logging.debug("Focus restored to DataTable after popping modal")
         else:
             logging.debug("No DataTable found after popping modal")
-
 
 
 def launch_external_ssh(ip: str):
