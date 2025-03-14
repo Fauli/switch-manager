@@ -96,7 +96,7 @@ Screen {
 
 /* Body styling for the modal */
 .modal-body {
-    padding: 1;
+    padding: 1 4;
     margin-top: 1;
     /* Optionally center the content vertically if needed */
     /* align: center middle; */
@@ -104,7 +104,8 @@ Screen {
 
 /* Text styling within the modal */
 .modal-text {
-    padding: 1;
+    /* padding: 1; */
+    margin: 1;
     /* text-align: center; */
     overflow-y: auto;
 }
