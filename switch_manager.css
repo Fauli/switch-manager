@@ -40,6 +40,14 @@ Screen {
     text-align: center;
 }
 
+.help {
+    padding: 0 1;
+    margin: 0 1;
+    border: round #333333;
+    width: 18;
+    text-align: center;
+}
+
 .command.active {
     text-style: bold underline;
 }
