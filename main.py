@@ -166,7 +166,7 @@ class SwitchManagerApp(App):
     
     def compose(self) -> ComposeResult:
         logging.debug("Composing main SwitchManagerApp widgets")
-        yield Static("Switch Manager", id="title", classes="center")
+        yield Static("V-Li: Switch Manager", id="title", classes="center")
         with Vertical(id="main_container"):
             with Horizontal(id="command_bar"):
                 for i, cmd in enumerate(self.commands):
@@ -305,15 +305,24 @@ class SwitchManagerApp(App):
     async def action_show_help(self) -> None:
         """Show help information when ctrl+h is pressed."""
         help_text = (
-            "Switch Manager:\n\n"
-            "- Use UP/DOWN arrows to navigate the table.\n"
-            "- Use LEFT/RIGHT arrows to switch commands.\n"
-            "- Press ENTER to execute the selected command.\n"
-            "- Use the search input to filter the table rows.\n"
-            "- Press CTRL+H to show this help screen.\n"
-            "- In any modal, press ESC to close it."
-            "\n\n\n"
-            "Created by Franz, 2025"
+            r" ____   ____        .____    .__ "+"\n"
+            r" \   \ /   /        |    |   |__|"+"\n"
+            r"  \   Y   /  ______ |    |   |  |"+"\n"
+            r"   \     /  /_____/ |    |___|  |"+"\n"
+            r"    \___/           |_______ \__|"+"\n"
+            r"                            \/   "+"\n"
+            r"                                 "+"\n"
+            "      V-Li: Switch Manager\n\n"
+            " - Use UP/DOWN arrows to navigate the table.\n"
+            " - Use LEFT/RIGHT arrows to switch commands.\n"
+            " - Press ENTER to execute the selected command.\n"
+            " - Use the search input to filter the table rows.\n"
+            " - Press CTRL+H to show this help screen.\n"
+            " - In any modal, press ESC to close it."
+            " \n\n\n"
+            " For feature requests or bug reports, please contact the developer."
+            " \n\n\n"
+            " ¬ Created by Franz, 2025"
         )
         logging.debug("Showing help screen with static help text")
         await self.push_screen(OutputScreen(help_text))
