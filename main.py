@@ -360,20 +360,26 @@ class SwitchManagerApp(App):
     
     def on_input_changed(self, event: Input.Changed) -> None:
         logging.debug(f"Search input changed: {event.value}")
-        search_text = event.value.lower()
+        search_text = event.value.lower().strip()
         if search_text == "":
             self.filtered_data = self.data.copy()
         else:
+            # Split the search text by whitespace into tokens.
+            tokens = search_text.split()
             self.filtered_data = [
                 row for row in self.data
-                if (search_text in row.get("Name", row.get("name", "")).lower() or 
-                    search_text in row.get("IP", row.get("ip", "")).lower() or 
-                    search_text in row.get("subnet", row.get("Subnet", "")).lower() or 
-                    search_text in row.get("aliases", row.get("Alias", "")).lower() or 
-                    search_text in row.get("comment", row.get("Comment", "")).lower())
+                if any(
+                    token in row.get("Name", row.get("name", "")).lower() or
+                    token in row.get("IP", row.get("ip", "")).lower() or
+                    token in row.get("subnet", row.get("Subnet", "")).lower() or
+                    token in row.get("aliases", row.get("Alias", "")).lower() or
+                    token in row.get("comment", row.get("Comment", "")).lower()
+                    for token in tokens
+                )
             ]
         logging.debug(f"{len(self.filtered_data)} rows match search text")
         self.update_table(self.filtered_data)
+        
     
     async def pop_screen(self) -> None:
         logging.debug("SwitchManagerApp popping screen (modal closed)")
@@ -408,6 +414,7 @@ def launch_external_ssh(ip: str):
 
 
 if __name__ == "__main__":
-    logging.debug("Starting SwitchManagerApp")
-    app = SwitchManagerApp(csv_path="data.csv")
+    csv_path = os.environ.get("SM_CSV_DATA", "data.csv")
+    logging.debug(f"Starting SwitchManagerApp with CSV file: {csv_path}")
+    app = SwitchManagerApp(csv_path=csv_path)
     app.run()
