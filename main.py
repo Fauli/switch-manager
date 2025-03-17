@@ -314,6 +314,8 @@ class SwitchManagerApp(App):
                 " - Use LEFT/RIGHT arrows to switch commands.\n"
                 " - Press ENTER to execute the selected command.\n"
                 " - Use the search input to filter the table rows.\n"
+                " - You can search for multiple tokens by splitting them with a whitespace.\n"
+                "   i.e. 'alt neu' will search for both 'alt' and 'neu'.\n"
                 " - Select the Help command to view this information.\n"
                 " - In any modal, press ESC to close it.\n\n"
                 " For feature requests or bug reports, please contact the developer.\n\n"

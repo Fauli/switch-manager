@@ -26,7 +26,8 @@ pip install -r requirements.txt
 
 ## Usage
 ```bash
-export SM_USER=$(whoami)   # Used for outgoing SSH connections
+export SM_USER=$(whoami)            # Used for outgoing SSH connections
+export SM_CSV_DATA=$(pwd)/data.csv  # Optionally set a different location for the CSV file
 
 python3 main.py
 ```
@@ -35,7 +36,9 @@ python3 main.py
 
 The source file that is being parsed is currently expecting the following format.
 
-The manager looks for the file with the name data.csv in the same directly as the application. A sample file has been provided.
+The manager looks for the file with the name data.csv in the same directly as the application. This can be overwritteb by setting the SM_CSV_DATA environment variable.
+
+A sample file has been provided.
 
 ```csv
 Name;IP;subnet;aliases;comment;type;id;responsible;aix_server
