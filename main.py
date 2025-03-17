@@ -11,7 +11,6 @@ from textual.containers import Horizontal, Vertical
 from textual import events
 from textual.timer import Timer
 from textual.screen import Screen
-from textual.scroll_view import ScrollView
 from textual.css.query import NoMatches
 
 # Configure logging: if SM_DEBUG is true, log debug messages to file;
