@@ -220,10 +220,25 @@ class SwitchManagerApp(App):
                 yield DataTable(id="data_table")
             yield Static("", id="status", classes="status")
     
-    def on_mount(self) -> None:
+
+    async def on_mount(self) -> None:
         logging.debug("SwitchManagerApp mounting: loading CSV and updating table")
-        self.load_csv()
+        # Display a message in the status widget.
+        try:
+            status_widget = self.query("#status").first()
+        except Exception:
+            status_widget = None
+        if status_widget:
+            status_widget.update("V-Li is collecting all the data for you... Please be patient...")
+        
+        # Offload CSV reading so that the UI can update.
+        await asyncio.to_thread(self.load_csv)
         self.update_table(self.data)
+        
+        # Clear the status message.
+        if status_widget:
+            status_widget.update("")
+        
         try:
             table = self.query(DataTable).first()
         except NoMatches:
