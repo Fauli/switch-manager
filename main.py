@@ -29,7 +29,16 @@ else:
         format="%(asctime)s %(levelname)s: %(message)s"
     )
 
-
+class PersistentInput(Input):
+    def on_focus(self) -> None:
+        # Set the cursor at the end without triggering the default selection behavior.
+        self.cursor_position = len(self.value)
+        # Do not call super().on_focus() to avoid selecting all text.
+    
+    def select_all(self) -> None:
+        # Override the default method that selects all text on focus.
+        pass
+    
 class StreamingOutputScreen(Screen):
     """A modal screen that streams command output as it is produced."""
     def __init__(self, cmd: list, **kwargs):
@@ -172,7 +181,7 @@ class SwitchManagerApp(App):
                 for i, cmd in enumerate(self.commands):
                     css_class = "command active" if i == self.active_command_index else "command"
                     yield Static(cmd, id=f"cmd-{i}", classes=css_class)
-            yield Input(placeholder="Search...", id="search_input")
+            yield PersistentInput(placeholder="Search...", id="search_input")
             with Vertical(id="table_container"):
                 yield DataTable(id="data_table")
             yield Static("", id="status", classes="status")
@@ -325,6 +334,13 @@ class SwitchManagerApp(App):
     async def on_key(self, event: events.Key) -> None:
         logging.debug(f"SwitchManagerApp received key event: {event.key}")
         if event.key in ("left", "right"):
+            try:
+                search_input = self.query("#search_input").first()
+            except Exception:
+                search_input = None
+            if search_input and search_input.has_focus:
+                search_input.blur()
+
             if event.key == "left":
                 logging.debug("Processing left key: switching to previous command")
                 self.action_prev_command()
