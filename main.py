@@ -400,7 +400,7 @@ def launch_external_ssh(ip: str):
         '''
         subprocess.Popen(["osascript", "-e", script])
     elif sys.platform.startswith("linux"):
-        subprocess.Popen(["xterm", "-e", "ssh", f"{username}@{ip}"])
+        subprocess.Popen(["xterm", "-e", "-fa", "DejaVuSansMono", "ssh", f"{username}@{ip}"])
     elif sys.platform.startswith("win"):
         subprocess.Popen(["start", "cmd", "/k", f"ssh {username}@{ip}"], shell=True)
     else:

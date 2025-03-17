@@ -24,6 +24,13 @@ source venv/bin/activate
 pip install -r requirements.txt 
 ```
 
+## Usage
+```bash
+export SM_USER=$(whoami)   # Used for outgoing SSH connections
+
+python3 main.py
+```
+
 ## Screenshots
 
 <p align="center">
