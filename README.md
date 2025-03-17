@@ -15,6 +15,7 @@ The V-Li: Switch Manager is a simple tool to manage your network switches. It pr
 - Nicely show all your switches
 - SSH to your switches
 - Ping your switches
+- Batch ping your switches
 - Trace route to your switches
 
 ## Installation

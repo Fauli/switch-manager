@@ -47,7 +47,8 @@ class StreamingOutputScreen(Screen):
             yield Vertical(
                 Static("", id="output_text", classes="modal-text"),
                 id="modal_body", classes="modal-body"
-            )    
+            )
+    
     async def on_mount(self) -> None:
         logging.debug("StreamingOutputScreen mounted, starting stream_output")
         self._stream_task = asyncio.create_task(self.stream_output())
@@ -123,17 +124,16 @@ class OutputScreen(Screen):
         with Vertical(classes="modal-container"):
             yield Static("Press ESC to close", id="modal_header", classes="modal-header")
             yield Vertical(
-                    Static(self.output_text, id="output_text", classes="modal-text"),
-                    id="modal_body", classes="modal-body"
-                )
-
+                Static(self.output_text, id="output_text", classes="modal-text"),
+                id="modal_body", classes="modal-body"
+            )
+    
     def update_output(self, new_text: str) -> None:
         try:
             widget = self.query("Static#output_text").first()
             widget.update(new_text)
         except Exception as e:
             logging.error(f"Failed to update output: {e}")
-
     
     async def on_key(self, event: events.Key) -> None:
         if event.key == "escape":
@@ -155,6 +155,40 @@ class OutputScreen(Screen):
             logging.debug("No DataTable found in OutputScreen on_unmount")
 
 
+def launch_external_ssh(ip: str):
+    username = os.environ.get("SM_USER", "")
+    if sys.platform.startswith("darwin"):
+        script = f'''
+        tell application "Terminal"
+            do script "ssh {username}@{ip}"
+            activate
+        end tell
+        '''
+        subprocess.Popen(["osascript", "-e", script])
+    elif sys.platform.startswith("linux"):
+        subprocess.Popen(["xterm", "-e", "-fa", "DejaVuSansMono", "ssh", f"{username}@{ip}"])
+    elif sys.platform.startswith("win"):
+        subprocess.Popen(["start", "cmd", "/k", f"ssh {username}@{ip}"], shell=True)
+    else:
+        raise NotImplementedError("Platform not supported")
+
+
+# Helper function to get column value for sorting.
+def get_value(row, col_index):
+    if col_index == 0:
+        return row.get("Name", row.get("name", ""))
+    elif col_index == 1:
+        return row.get("IP", row.get("ip", ""))
+    elif col_index == 2:
+        return row.get("subnet", row.get("Subnet", ""))
+    elif col_index == 3:
+        return row.get("aliases", row.get("Alias", ""))
+    elif col_index == 4:
+        return row.get("comment", row.get("Comment", ""))
+    else:
+        return ""
+
+
 class SwitchManagerApp(App):
     CSS_PATH = "switch_manager.css"
     BINDINGS = [
@@ -168,10 +202,11 @@ class SwitchManagerApp(App):
         self.csv_path = csv_path
         self.data = []          # All rows loaded from CSV.
         self.filtered_data = [] # Filtered rows.
-        # Added "help" as one of the commands.
         self.commands = ["ssh", "ping", "traceroute", "batch ping", "details", "help", "exit"]
         self.active_command_index = 0
         self.status_timer: Timer | None = None
+        self.sort_column = None  # None means no sort has been applied yet.
+        self.sort_ascending = True
     
     def compose(self) -> ComposeResult:
         logging.debug("Composing main SwitchManagerApp widgets")
@@ -234,6 +269,18 @@ class SwitchManagerApp(App):
                 row.get("comment", row.get("Comment", ""))
             )
     
+    def sort_table(self, col_index: int) -> None:
+        # Toggle sort order if the same column is sorted again.
+        if self.sort_column == col_index:
+            self.sort_ascending = not self.sort_ascending
+        else:
+            self.sort_column = col_index
+            self.sort_ascending = True
+        
+        logging.debug(f"Sorting table by column {col_index} in {'ascending' if self.sort_ascending else 'descending'} order")
+        self.filtered_data.sort(key=lambda row: get_value(row, col_index).lower(), reverse=not self.sort_ascending)
+        self.update_table(self.filtered_data)
+    
     def action_prev_command(self) -> None:
         logging.debug("SwitchManagerApp: Moving to previous command")
         self.active_command_index = (self.active_command_index - 1) % len(self.commands)
@@ -274,7 +321,7 @@ class SwitchManagerApp(App):
         if table and table.row_count > 0:
             logging.debug("SwitchManagerApp: Moving cursor down in DataTable")
             table.action_cursor_down()
-
+    
     async def run_ping(self, hostname: str, ip: str) -> str:
         proc = await asyncio.create_subprocess_exec(
             "ping", "-c", "1", ip,
@@ -286,10 +333,9 @@ class SwitchManagerApp(App):
             return f">> {hostname} ({ip}):\n" + stdout.decode()
         else:
             return f">> {hostname} ({ip}):\n" + stderr.decode()
-
+    
     async def run_batch_ping(self) -> None:
         logging.debug("Running batch ping on filtered data")
-        # First, push an output screen with a loading message.
         loading_screen = OutputScreen("Running batch ping, please wait...")
         await self.push_screen(loading_screen)
         
@@ -301,7 +347,6 @@ class SwitchManagerApp(App):
                 tasks.append(asyncio.create_task(self.run_ping(hostname, ip)))
         results = await asyncio.gather(*tasks, return_exceptions=True)
         combined_output = "\n\n".join(str(result) for result in results)
-        # Update the already-pushed output screen with the results.
         loading_screen.update_output(combined_output)
     
     async def action_execute_command(self) -> None:
@@ -341,7 +386,6 @@ class SwitchManagerApp(App):
             logging.debug("Details command received; pushing OutputScreen")
             await self.push_screen(OutputScreen(details))
         elif command == "help":
-            # Show the help modal.
             help_text = (
                 r" ____   ____        .____    .__ "+"\n"
                 r" \   \ /   /        |    |   |__|"+"\n"
@@ -355,8 +399,9 @@ class SwitchManagerApp(App):
                 " - Use LEFT/RIGHT arrows to switch commands.\n"
                 " - Press ENTER to execute the selected command.\n"
                 " - Use the search input to filter the table rows.\n"
-                " - You can search for multiple tokens by splitting them with a whitespace.\n"
-                "   i.e. 'alt neu' will search for both 'alt' and 'neu'.\n"
+                " - You can search for multiple tokens by splitting them with whitespace.\n"
+                " - Batch operations will be applied to all items in the data table.\n"
+                " - Press the F* keys on your keyboard to change the sort column.\n"
                 " - Select the Help command to view this information.\n"
                 " - In any modal, press ESC to close it.\n\n"
                 " For feature requests or bug reports, please contact the developer.\n\n"
@@ -367,6 +412,17 @@ class SwitchManagerApp(App):
     
     async def on_key(self, event: events.Key) -> None:
         logging.debug(f"SwitchManagerApp received key event: {event.key}")
+        # Check for F1-F5 keys to sort by respective columns.
+        if event.key.lower().startswith("f"):
+            try:
+                col_num = int(event.key[1:])
+            except ValueError:
+                col_num = None
+            if col_num is not None and 1 <= col_num <= 5:
+                self.sort_table(col_num - 1)
+                event.stop()
+                return
+
         if event.key in ("left", "right"):
             if event.key == "left":
                 logging.debug("Processing left key: switching to previous command")
@@ -407,7 +463,6 @@ class SwitchManagerApp(App):
         if search_text == "":
             self.filtered_data = self.data.copy()
         else:
-            # Split the search text by whitespace into tokens.
             tokens = search_text.split()
             self.filtered_data = [
                 row for row in self.data
@@ -422,7 +477,6 @@ class SwitchManagerApp(App):
             ]
         logging.debug(f"{len(self.filtered_data)} rows match search text")
         self.update_table(self.filtered_data)
-        
     
     async def pop_screen(self) -> None:
         logging.debug("SwitchManagerApp popping screen (modal closed)")
