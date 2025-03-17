@@ -44,9 +44,10 @@ class StreamingOutputScreen(Screen):
         logging.debug("Composing StreamingOutputScreen widgets")
         with Vertical(classes="modal-container"):
             yield Static("Press ESC to close", id="modal_header", classes="modal-header")
-            yield ScrollView(Static("", id="output_text", classes="modal-text"),
-                             id="modal_body", classes="modal-body")
-    
+            yield Vertical(
+                Static("", id="output_text", classes="modal-text"),
+                id="modal_body", classes="modal-body"
+            )    
     async def on_mount(self) -> None:
         logging.debug("StreamingOutputScreen mounted, starting stream_output")
         self._stream_task = asyncio.create_task(self.stream_output())
@@ -121,10 +122,18 @@ class OutputScreen(Screen):
         logging.debug("Composing OutputScreen widgets")
         with Vertical(classes="modal-container"):
             yield Static("Press ESC to close", id="modal_header", classes="modal-header")
-            yield ScrollView(
-                Static(self.output_text, id="output_text", classes="modal-text"),
-                id="modal_body", classes="modal-body"
-            )
+            yield Vertical(
+                    Static(self.output_text, id="output_text", classes="modal-text"),
+                    id="modal_body", classes="modal-body"
+                )
+
+    def update_output(self, new_text: str) -> None:
+        try:
+            widget = self.query("Static#output_text").first()
+            widget.update(new_text)
+        except Exception as e:
+            logging.error(f"Failed to update output: {e}")
+
     
     async def on_key(self, event: events.Key) -> None:
         if event.key == "escape":
@@ -160,7 +169,7 @@ class SwitchManagerApp(App):
         self.data = []          # All rows loaded from CSV.
         self.filtered_data = [] # Filtered rows.
         # Added "help" as one of the commands.
-        self.commands = ["ssh", "ping", "traceroute", "details", "help", "exit"]
+        self.commands = ["ssh", "ping", "traceroute", "batch ping", "details", "help", "exit"]
         self.active_command_index = 0
         self.status_timer: Timer | None = None
     
@@ -265,6 +274,35 @@ class SwitchManagerApp(App):
         if table and table.row_count > 0:
             logging.debug("SwitchManagerApp: Moving cursor down in DataTable")
             table.action_cursor_down()
+
+    async def run_ping(self, hostname: str, ip: str) -> str:
+        proc = await asyncio.create_subprocess_exec(
+            "ping", "-c", "1", ip,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        if stdout:
+            return f">> {hostname} ({ip}):\n" + stdout.decode()
+        else:
+            return f">> {hostname} ({ip}):\n" + stderr.decode()
+
+    async def run_batch_ping(self) -> None:
+        logging.debug("Running batch ping on filtered data")
+        # First, push an output screen with a loading message.
+        loading_screen = OutputScreen("Running batch ping, please wait...")
+        await self.push_screen(loading_screen)
+        
+        tasks = []
+        for row in self.filtered_data:
+            ip = row.get("IP", "").strip()
+            hostname = row.get("Name", row.get("name", ""))
+            if ip:
+                tasks.append(asyncio.create_task(self.run_ping(hostname, ip)))
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        combined_output = "\n\n".join(str(result) for result in results)
+        # Update the already-pushed output screen with the results.
+        loading_screen.update_output(combined_output)
     
     async def action_execute_command(self) -> None:
         try:
@@ -295,6 +333,9 @@ class SwitchManagerApp(App):
         elif command == "traceroute":
             logging.debug(f"Traceroute command received; pushing StreamingOutputScreen for {ip}")
             await self.push_screen(StreamingOutputScreen(["traceroute", ip]))
+        elif command == "batch ping":
+            logging.debug("Batch ping command received; running batch ping")
+            await self.run_batch_ping()
         elif command == "details":
             details = "\n".join([f"{k}: {v}" for k, v in row_data.items()])
             logging.debug("Details command received; pushing OutputScreen")

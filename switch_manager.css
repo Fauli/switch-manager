@@ -105,7 +105,10 @@ Screen {
 /* Body styling for the modal */
 .modal-body {
     padding: 1 4;
-    margin-top: 1;
+    margin: 1;
+    overflow: auto;  /* Ensure vertical scrolling is enabled */
+    height: 90vh;
+    border: round #555555;
     /* Optionally center the content vertically if needed */
     /* align: center middle; */
 }
@@ -115,5 +118,6 @@ Screen {
     /* padding: 1; */
     margin: 1;
     /* text-align: center; */
-    overflow-y: auto;
+    /* overflow: auto; */
 }
+
