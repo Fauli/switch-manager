@@ -8,7 +8,7 @@
 
 ## Introduction
 
-The V-Li: Switch Manager is a simple tool to manage your network switches. It provides a simple Text Based UI to check on your switches and connect to them
+The V-Li: Switch Manager is a simple tool to manage your network switches. It provides a simple Text based UI to check on your switches and connect to them.
 
 ## Features
 
