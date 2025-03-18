@@ -16,7 +16,7 @@ from textual.css.query import NoMatches
 # Configure logging: if SM_DEBUG is true, log debug messages to file;
 # otherwise, only warnings are printed.
 SM_DEBUG = os.environ.get("SM_DEBUG", "false").lower() == "true"
-SM_DELIMITER = os.environ.get("SM_DELIMITER", ";").lower()
+SM_DELIMITER = os.environ.get("SM_DELIMITER", ";")
 if SM_DEBUG:
     logging.basicConfig(
         filename="switch-manager.log",
@@ -189,6 +189,30 @@ def get_value(row, col_index):
         return ""
 
 
+def launch_tmux_ssh(ips: list):
+    """Launch a tmux session with one pane per IP."""
+    username = os.environ.get("SM_USER", "")
+    # tmux is typically available on Linux and macOS.
+    if sys.platform.startswith("win"):
+        logging.warning("tmux is not supported on Windows")
+        return
+    session_name = "switchmanager_tmux"
+    # Kill any existing session with that name (ignore errors)
+    subprocess.run(["tmux", "kill-session", "-t", session_name], stderr=subprocess.DEVNULL)
+    if not ips:
+        logging.debug("No IP addresses provided for tmux SSH")
+        return
+    # Create a new detached session with the first IP.
+    subprocess.run(["tmux", "new-session", "-d", "-s", session_name, "ssh", f"{username}@{ips[0]}"])
+    # For each additional IP, split the window.
+    for ip in ips[1:]:
+        subprocess.run(["tmux", "split-window", "-t", session_name, "ssh", f"{username}@{ip}"])
+    # Arrange the panes in a tiled layout.
+    subprocess.run(["tmux", "select-layout", "-t", session_name, "tiled"])
+    # Attach to the session.
+    subprocess.run(["tmux", "attach-session", "-t", session_name])
+
+
 class SwitchManagerApp(App):
     CSS_PATH = "switch_manager.css"
     BINDINGS = [
@@ -202,7 +226,8 @@ class SwitchManagerApp(App):
         self.csv_path = csv_path
         self.data = []          # All rows loaded from CSV.
         self.filtered_data = [] # Filtered rows.
-        self.commands = ["ssh", "ping", "traceroute", "batch ping", "details", "help", "exit"]
+        # Add "tmux" as a command.
+        self.commands = ["ssh", "ping", "traceroute", "batch ping", "tmux", "details", "help", "exit"]
         self.active_command_index = 0
         self.status_timer: Timer | None = None
         self.sort_column = None  # None means no sort has been applied yet.
@@ -215,7 +240,7 @@ class SwitchManagerApp(App):
             with Horizontal(id="command_bar"):
                 for i, cmd in enumerate(self.commands):
                     css_class = "command active" if i == self.active_command_index else "command"
-                    yield Static(cmd, id=f"cmd-{i}", classes=css_class)
+                    yield Static(cmd, id=f"cmd-{i}", classes="modal-header" if cmd == "help" else "command")
             yield Input(placeholder="Search...", id="search_input")
             with Vertical(id="table_container"):
                 yield DataTable(id="data_table")
@@ -223,8 +248,16 @@ class SwitchManagerApp(App):
     
     def on_mount(self) -> None:
         logging.debug("SwitchManagerApp mounting: loading CSV and updating table")
+        # Display a status message while loading CSV data.
+        try:
+            status_widget = self.query("#status").first()
+            status_widget.update("V-Li is collecting all the data for you... Please be patient...")
+        except Exception:
+            pass
+        
         self.load_csv()
         self.update_table(self.data)
+        
         try:
             table = self.query(DataTable).first()
         except NoMatches:
@@ -235,6 +268,12 @@ class SwitchManagerApp(App):
             logging.debug("DataTable focused in SwitchManagerApp on_mount")
         else:
             logging.debug("No DataTable found in on_mount")
+        # Clear status message after loading.
+        try:
+            status_widget = self.query("#status").first()
+            status_widget.update("")
+        except Exception:
+            pass
     
     def load_csv(self) -> None:
         logging.debug("Loading CSV data")
@@ -270,7 +309,6 @@ class SwitchManagerApp(App):
             )
     
     def sort_table(self, col_index: int) -> None:
-        # Toggle sort order if the same column is sorted again.
         if self.sort_column == col_index:
             self.sort_ascending = not self.sort_ascending
         else:
@@ -381,6 +419,12 @@ class SwitchManagerApp(App):
         elif command == "batch ping":
             logging.debug("Batch ping command received; running batch ping")
             await self.run_batch_ping()
+        elif command == "tmux":
+            # Gather IP addresses from filtered_data.
+            ips = [ row.get("IP", row.get("ip", "")) for row in self.filtered_data if row.get("IP", row.get("ip", "")) ]
+            if ips:
+                logging.debug(f"TMUX command received; launching tmux session with {len(ips)} panes")
+                launch_tmux_ssh(ips)
         elif command == "details":
             details = "\n".join([f"{k}: {v}" for k, v in row_data.items()])
             logging.debug("Details command received; pushing OutputScreen")
@@ -402,6 +446,7 @@ class SwitchManagerApp(App):
                 " - You can search for multiple tokens by splitting them with whitespace.\n"
                 " - Batch operations will be applied to all items in the data table.\n"
                 " - Press the F* keys on your keyboard to change the sort column.\n"
+                " - The tmux command opens a new tmux session with an SSH pane per switch.\n"
                 " - Select the Help command to view this information.\n"
                 " - In any modal, press ESC to close it.\n\n"
                 " For feature requests or bug reports, please contact the developer.\n\n"
@@ -509,6 +554,41 @@ def launch_external_ssh(ip: str):
     else:
         raise NotImplementedError("Platform not supported")
 
+
+def launch_tmux_ssh(ips: list):
+    """Launch a new tmux screen with a split-up view of SSH connections for each IP.
+       If already in a tmux session, a new window will be created instead."""
+    username = os.environ.get("SM_USER", "")
+    if sys.platform.startswith("win"):
+        logging.warning("tmux is not supported on Windows")
+        return
+
+    window_name = "ssh"
+    # Check if we're already inside tmux.
+    if "TMUX" in os.environ:
+        # Create a new window in the current session.
+        subprocess.run(["tmux", "new-window", "-n", window_name, "ssh", f"{username}@{ips[0]}"])
+        # For each additional IP, split the window to add a pane.
+        for ip in ips[1:]:
+            subprocess.run(["tmux", "split-window", "-t", window_name, "ssh", f"{username}@{ip}"])
+        # Arrange panes in a tiled layout.
+        subprocess.run(["tmux", "select-layout", "-t", window_name, "tiled"])
+        # Optionally, switch to that window.
+        subprocess.run(["tmux", "select-window", "-t", window_name])
+    else:
+        # Not inside a tmux session: create a new session.
+        session_name = "switchmanager_tmux"
+        # Kill any existing session with the same name.
+        subprocess.run(["tmux", "kill-session", "-t", session_name], stderr=subprocess.DEVNULL)
+        # Create a new detached session with the first IP.
+        subprocess.run(["tmux", "new-session", "-d", "-s", session_name, "-n", window_name, "ssh", f"{username}@{ips[0]}"])
+        # For each additional IP, split the window.
+        for ip in ips[1:]:
+            subprocess.run(["tmux", "split-window", "-t", f"{session_name}:{window_name}", "ssh", f"{username}@{ip}"])
+        # Arrange the panes in a tiled layout.
+        subprocess.run(["tmux", "select-layout", "-t", f"{session_name}:{window_name}", "tiled"])
+        # Attach to the new session.
+        subprocess.run(["tmux", "attach-session", "-t", session_name])
 
 if __name__ == "__main__":
     csv_path = os.environ.get("SM_CSV_DATA", "data.csv")
