@@ -29,6 +29,7 @@ pip install -r requirements.txt
 ```bash
 export SM_USER=$(whoami)            # Used for outgoing SSH connections
 export SM_CSV_DATA=$(pwd)/data.csv  # Optionally set a different location for the CSV file
+export SM_DELIMITER=";"
 
 python3 main.py
 ```

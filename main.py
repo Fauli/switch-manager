@@ -16,6 +16,7 @@ from textual.css.query import NoMatches
 # Configure logging: if SM_DEBUG is true, log debug messages to file;
 # otherwise, only warnings are printed.
 SM_DEBUG = os.environ.get("SM_DEBUG", "false").lower() == "true"
+SM_DELIMITER = os.environ.get("SM_DELIMITER", ";").lower()
 if SM_DEBUG:
     logging.basicConfig(
         filename="switch-manager.log",
@@ -220,25 +221,10 @@ class SwitchManagerApp(App):
                 yield DataTable(id="data_table")
             yield Static("", id="status", classes="status")
     
-
-    async def on_mount(self) -> None:
+    def on_mount(self) -> None:
         logging.debug("SwitchManagerApp mounting: loading CSV and updating table")
-        # Display a message in the status widget.
-        try:
-            status_widget = self.query("#status").first()
-        except Exception:
-            status_widget = None
-        if status_widget:
-            status_widget.update("V-Li is collecting all the data for you... Please be patient...")
-        
-        # Offload CSV reading so that the UI can update.
-        await asyncio.to_thread(self.load_csv)
+        self.load_csv()
         self.update_table(self.data)
-        
-        # Clear the status message.
-        if status_widget:
-            status_widget.update("")
-        
         try:
             table = self.query(DataTable).first()
         except NoMatches:
@@ -255,7 +241,7 @@ class SwitchManagerApp(App):
         csv_file = Path(self.csv_path)
         if csv_file.exists():
             with csv_file.open("r", newline="", encoding="utf-8") as f:
-                reader = csv.DictReader(f, delimiter=";")
+                reader = csv.DictReader(f, delimiter=SM_DELIMITER)
                 self.data = [{k.strip(): v for k, v in row.items()} for row in reader]
             logging.debug(f"CSV loaded with {len(self.data)} rows")
         else:
