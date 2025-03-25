@@ -399,7 +399,7 @@ class SwitchManagerApp(App):
                 " - Use LEFT/RIGHT arrows to switch commands.\n"
                 " - Press ENTER to execute the selected command.\n"
                 " - Use the search input to filter the table rows.\n"
-                " - You can search for multiple tokens by splitting them with whitespace.\n"
+                " - You can search for multiple tokens in the same line by simply splitting them with whitespace.\n"
                 " - Batch operations will be applied to all items in the data table.\n"
                 " - Press the F* keys on your keyboard to change the sort column.\n"
                 " - Select the Help command to view this information.\n"
