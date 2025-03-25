@@ -399,7 +399,7 @@ class SwitchManagerApp(App):
                 " - Use LEFT/RIGHT arrows to switch commands.\n"
                 " - Press ENTER to execute the selected command.\n"
                 " - Use the search input to filter the table rows.\n"
-                " - You can search for multiple tokens by splitting them with whitespace.\n"
+                " - You can search for multiple tokens in the same line by simply splitting them with whitespace.\n"
                 " - Batch operations will be applied to all items in the data table.\n"
                 " - Press the F* keys on your keyboard to change the sort column.\n"
                 " - Select the Help command to view this information.\n"
@@ -460,21 +460,25 @@ class SwitchManagerApp(App):
     def on_input_changed(self, event: Input.Changed) -> None:
         logging.debug(f"Search input changed: {event.value}")
         search_text = event.value.lower().strip()
-        if search_text == "":
+
+        if not search_text:
+            # If search text is empty, reset the filtered data to the full dataset
             self.filtered_data = self.data.copy()
         else:
+            # Split search text into individual tokens (words)
             tokens = search_text.split()
+
             self.filtered_data = [
                 row for row in self.data
-                if any(
-                    token in row.get("Name", row.get("name", "")).lower() or
-                    token in row.get("IP", row.get("ip", "")).lower() or
-                    token in row.get("subnet", row.get("Subnet", "")).lower() or
-                    token in row.get("aliases", row.get("Alias", "")).lower() or
-                    token in row.get("comment", row.get("Comment", "")).lower()
-                    for token in tokens
+                if all(  # Ensure ALL tokens match at least one field in the row
+                    any(
+                        token in str(row.get(field, "")).lower()
+                        for field in ["Name", "name", "IP", "ip", "subnet", "Subnet", "aliases", "Alias", "comment", "Comment"]
+                    )
+                    for token in tokens  # Check for each token individually
                 )
             ]
+
         logging.debug(f"{len(self.filtered_data)} rows match search text")
         self.update_table(self.filtered_data)
     
