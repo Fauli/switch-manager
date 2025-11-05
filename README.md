@@ -56,6 +56,28 @@ V-Li Switch Manager is a **keyboard-first terminal user interface (TUI)** for ma
 
 ## Quick Start
 
+### 🎬 Super Easy Way (Recommended)
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd switch-manager
+
+# 2. Run the launcher script - it does everything automatically!
+./run.sh
+
+# That's it! The script will:
+# ✓ Check Python version (3.11+ required)
+# ✓ Create virtual environment
+# ✓ Install all dependencies
+# ✓ Configure environment variables
+# ✓ Launch the application
+```
+
+**First time setup takes ~30 seconds. Subsequent launches are instant!**
+
+### 📋 Manual Way (Alternative)
+
 ```bash
 # 1. Clone and setup
 git clone <repository-url>
@@ -71,13 +93,15 @@ export SM_USER="your_username"
 
 # 4. Run the application
 python -m switch_manager
-
-# 5. Start using!
-# - Type to search switches
-# - Press 1-8 to select commands
-# - Press Enter to execute
-# - Press ? for help
 ```
+
+### 🎯 Start Using
+
+Once launched:
+- **Type** to search switches
+- Press **1-8** to select commands
+- Press **Enter** to execute
+- Press **?** for help
 
 ---
 
