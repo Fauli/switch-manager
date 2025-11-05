@@ -416,6 +416,10 @@ class StreamingModal(BaseModal):
         self.command = command
         self.process = None
 
+        # Easter egg: Konami code tracking (classic sequence!)
+        self.konami_sequence = ["up", "up", "down", "down", "left", "right", "left", "right", "b", "a"]
+        self.konami_progress = 0
+
     def compose(self) -> ComposeResult:
         """Compose the modal."""
         with Container():
@@ -500,6 +504,20 @@ class StreamingModal(BaseModal):
         Args:
             event: Key event
         """
+        # Easter egg: Konami code detection (hidden - no visual feedback!)
+        if event.key == self.konami_sequence[self.konami_progress]:
+            self.konami_progress += 1
+
+            if self.konami_progress >= len(self.konami_sequence):
+                # Konami code completed!
+                self.konami_progress = 0  # Reset for next time
+                self.app.call_later(lambda: asyncio.create_task(self._show_konami_easter_egg()))
+                event.stop()
+                return
+        elif event.key in self.konami_sequence:
+            # Pressed a key in the sequence, but wrong position - reset
+            self.konami_progress = 0
+
         if event.key == "escape":
             # Cancel streaming task
             if hasattr(self, '_stream_task') and not self._stream_task.done():
@@ -514,6 +532,41 @@ class StreamingModal(BaseModal):
 
             self.dismiss()
             event.stop()
+
+    async def _show_konami_easter_egg(self) -> None:
+        """Show the Konami code easter egg modal."""
+        modal = KonamiModal()
+        await self.app.push_screen(modal)
+
+
+class KonamiModal(OutputModal):
+    """Secret easter egg modal for Konami code."""
+
+    def __init__(self) -> None:
+        """Initialize the Konami easter egg modal."""
+        title = "🎮 KONAMI CODE ACTIVATED! 🎮"
+        content = """
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║    💵  💵  💵     💵  💵  💵     💵  💵  💵                   ║
+║   💵 💵 💵 💵   💵 💵 💵 💵   💵 💵 💵 💵                     ║
+║  💵  💵  💵  💵 💵  💵  💵  💵 💵  💵  💵  💵                 ║
+║  💵          💵 💵          💵 💵          💵                 ║
+║  💵  💵  💵  💵 💵  💵  💵  💵 💵  💵  💵  💵                 ║
+║   💵 💵 💵 💵   💵 💵 💵 💵   💵 💵 💵 💵                     ║
+║    💵  💵  💵     💵  💵  💵     💵  💵  💵                   ║
+║                                                               ║
+║                                                               ║
+║              🎉  NO DOLLARS! HIGH FIVE!  🎉                   ║
+║                                                               ║
+║              👊  Keep managing those switches!  👊            ║
+║                                                               ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+Press ESC to return to your regularly scheduled network management.
+"""
+        super().__init__(title, content)
 
 
 class SearchHistoryModal(BaseModal):

@@ -3,8 +3,8 @@
 import asyncio
 from textual import events
 from textual.screen import Screen
-from textual.widgets import DataTable, Static, Input, Header, Footer
-from textual.containers import Container, Vertical
+from textual.widgets import DataTable, Static, Input
+from textual.containers import Vertical
 from textual.reactive import reactive
 
 from switch_manager.config import Config
@@ -15,7 +15,7 @@ from switch_manager.widgets.status_bar import StatusBar
 from switch_manager.screens.modals import DetailsModal, HelpModal, ConfirmationModal, StreamingModal, OutputModal, BatchPingModal, SearchHistoryModal
 from switch_manager.utils.validation import validate_ip, validate_username
 from switch_manager.utils.terminal import spawn_ssh_terminal, get_platform_name
-from switch_manager.utils.tmux_handler import is_tmux_available, create_tmux_session, attach_to_session
+from switch_manager.utils.tmux_handler import is_tmux_available, create_tmux_session
 
 
 class MainScreen(Screen):
@@ -279,11 +279,11 @@ class MainScreen(Screen):
             return f" | {arrow} {col_name}"
         return ""
 
-    def watch_search_mode(self, old_mode: SearchMode, new_mode: SearchMode) -> None:
+    def watch_search_mode(self, _old_mode: SearchMode, new_mode: SearchMode) -> None:
         """Watcher for search_mode reactive property.
 
         Args:
-            old_mode: Previous search mode
+            _old_mode: Previous search mode (unused)
             new_mode: New search mode
         """
         # Update search help bar
