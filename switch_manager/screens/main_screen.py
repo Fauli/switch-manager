@@ -12,7 +12,7 @@ from switch_manager.manager import SwitchManager
 from switch_manager.models import SearchMode, CommandType, COMMANDS
 from switch_manager.widgets.command_bar import CommandBar
 from switch_manager.widgets.status_bar import StatusBar
-from switch_manager.screens.modals import DetailsModal, HelpModal, ConfirmationModal, StreamingModal, OutputModal, BatchPingModal
+from switch_manager.screens.modals import DetailsModal, HelpModal, ConfirmationModal, StreamingModal, OutputModal, BatchPingModal, SearchHistoryModal
 from switch_manager.utils.validation import validate_ip, validate_username
 from switch_manager.utils.terminal import spawn_ssh_terminal, get_platform_name
 from switch_manager.utils.tmux_handler import is_tmux_available, create_tmux_session, attach_to_session
@@ -316,6 +316,12 @@ class MainScreen(Screen):
         # Ctrl+L: Toggle search mode
         if event.key == "ctrl+l":
             self.search_mode = self.manager.toggle_search_mode()
+            event.stop()
+            return
+
+        # Ctrl+H: Show search history
+        if event.key == "ctrl+h":
+            self.app.call_later(lambda: asyncio.create_task(self.show_search_history()))
             event.stop()
             return
 
@@ -843,6 +849,27 @@ class MainScreen(Screen):
         """Show help modal."""
         modal = HelpModal()
         await self.app.push_screen(modal)
+
+    async def show_search_history(self) -> None:
+        """Show search history modal and allow selection."""
+        # Get recent history from manager (newest first)
+        history = self.manager.get_recent_history(limit=20)
+
+        # Show the modal
+        modal = SearchHistoryModal(history)
+
+        # Use callback to handle selected search term
+        def handle_history_selection(selected_term):
+            if selected_term:
+                # User selected a search term - apply it
+                search_input = self.query_one("#search-input", Input)
+                search_input.value = selected_term
+                self.search_text = selected_term
+                self.perform_search()
+                # Keep focus on search input for potential editing
+                search_input.focus()
+
+        await self.app.push_screen(modal, callback=handle_history_selection)
 
     async def execute_exit_command(self) -> None:
         """Show exit confirmation and quit if confirmed."""

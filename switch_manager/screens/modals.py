@@ -202,7 +202,7 @@ NAVIGATION
 SEARCH
   Type    - Auto-focus search and filter switches
   Ctrl+L  - Toggle OR/AND search mode
-  Ctrl+H  - Show search history (Coming soon!)
+  Ctrl+H  - Show search history
   ESC     - Clear search / Exit app
   Enter   - Return focus to table
 
@@ -513,4 +513,105 @@ class StreamingModal(BaseModal):
                     pass
 
             self.dismiss()
+            event.stop()
+
+
+class SearchHistoryModal(BaseModal):
+    """Modal for displaying and selecting from search history."""
+
+    DEFAULT_CSS = BaseModal.DEFAULT_CSS + """
+    SearchHistoryModal > Container {
+        width: 60;
+        height: auto;
+        max-height: 30;
+    }
+
+    .history-list {
+        width: 100%;
+        height: auto;
+        max-height: 20;
+        padding: 1 2;
+        overflow-y: auto;
+    }
+
+    .history-empty {
+        width: 100%;
+        height: 5;
+        content-align: center middle;
+        padding: 2;
+        color: $text-muted;
+        text-style: italic;
+    }
+    """
+
+    def __init__(self, history: list[str]) -> None:
+        """Initialize the search history modal.
+
+        Args:
+            history: List of search history items (newest first)
+        """
+        super().__init__()
+        self.history = history
+        self.selected_index = 0
+
+    def compose(self) -> ComposeResult:
+        """Compose the modal."""
+        with Container():
+            yield Static("Search History", classes="modal-title")
+
+            if not self.history:
+                yield Static("No search history yet.\n\nStart searching to build your history!",
+                           classes="history-empty")
+                yield Static("Press ESC to close", classes="modal-footer")
+            else:
+                yield Static("", id="history-content", classes="history-list")
+                yield Static("↑/↓: Navigate  •  Enter: Apply  •  ESC: Close",
+                           classes="modal-footer")
+
+    def on_mount(self) -> None:
+        """Called when modal is mounted."""
+        if self.history:
+            self._render_history()
+
+    def _render_history(self) -> None:
+        """Render the history list with current selection."""
+        if not self.history:
+            return
+
+        content = self.query_one("#history-content", Static)
+
+        # Build the history display with selection indicator
+        lines = []
+        for i, search_term in enumerate(self.history):
+            if i == self.selected_index:
+                # Highlight selected item
+                lines.append(f"[bold cyan]▶ {search_term}[/bold cyan]")
+            else:
+                lines.append(f"  {search_term}")
+
+        content.update("\n".join(lines))
+
+    def on_key(self, event: events.Key) -> None:
+        """Handle key events.
+
+        Args:
+            event: Key event
+        """
+        if event.key == "escape":
+            self.dismiss(None)
+            event.stop()
+        elif event.key == "enter" and self.history:
+            # Return selected search term
+            selected = self.history[self.selected_index]
+            self.dismiss(selected)
+            event.stop()
+        elif event.key == "up" and self.history:
+            # Move selection up (with wrapping)
+            self.selected_index = (self.selected_index - 1) % len(self.history)
+            self._render_history()
+            event.stop()
+        elif event.key == "down" and self.history:
+            # Move selection down (with wrapping)
+            self.selected_index = (self.selected_index + 1) % len(self.history)
+            self._render_history()
             event.stop()
