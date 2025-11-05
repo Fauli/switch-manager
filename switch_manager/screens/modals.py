@@ -94,8 +94,18 @@ class ConfirmationModal(BaseModal):
 
     .modal-options {
         width: 100%;
+        padding: 2;
+        content-align: center middle;
+        background: $boost;
+        text-style: bold;
+    }
+
+    .modal-instructions {
+        width: 100%;
         padding: 1;
         content-align: center middle;
+        background: $panel;
+        text-style: italic;
     }
     """
 
@@ -123,14 +133,20 @@ class ConfirmationModal(BaseModal):
             # Warning (if provided)
             if self.warning_text:
                 yield Static(
-                    f"⚠ {self.warning_text}",
+                    f"⚠  {self.warning_text}",
                     classes="modal-message"
                 )
 
             # Options
             yield Static(
-                "[y] Yes   [n] No   [ESC] Cancel",
+                "Press:  Y = Yes  |  N = No  |  ESC = Cancel",
                 classes="modal-options"
+            )
+
+            # Instructions
+            yield Static(
+                "Keyboard input required - use Y, N, or ESC keys",
+                classes="modal-instructions"
             )
 
     def on_key(self, event: events.Key) -> None:
@@ -224,6 +240,153 @@ TIPS
 Press ESC to close this help.
 """
         super().__init__(title, content)
+
+
+class BatchPingModal(BaseModal):
+    """Modal for displaying batch ping results from multiple switches."""
+
+    DEFAULT_CSS = BaseModal.DEFAULT_CSS + """
+    .batch-output {
+        width: 100%;
+        height: 35;
+        padding: 1;
+        overflow-y: auto;
+        background: $surface;
+        color: $text;
+        border: solid $primary;
+    }
+
+    .batch-status {
+        width: 100%;
+        padding: 1;
+        content-align: center middle;
+        background: $panel;
+        text-style: italic;
+    }
+    """
+
+    def __init__(self, switches: list) -> None:
+        """Initialize the batch ping modal.
+
+        Args:
+            switches: List of Switch objects to ping
+        """
+        super().__init__()
+        self.switches = switches
+        self.results = []
+        self.completed = 0
+        self.total = len(switches)
+
+    def compose(self) -> ComposeResult:
+        """Compose the modal."""
+        with Container():
+            yield Static(f"Batch Ping Results ({self.total} switches)", classes="modal-title")
+            yield RichLog(id="batch-output", classes="batch-output", wrap=True, highlight=False, markup=True)
+            yield Static(f"Running batch ping on {self.total} switches...", id="batch-status", classes="batch-status")
+            yield Static("Press ESC to close", classes="modal-footer")
+
+    async def on_mount(self) -> None:
+        """Start batch ping when mounted."""
+        output_log = self.query_one("#batch-output", RichLog)
+        status = self.query_one("#batch-status", Static)
+
+        # Start background task for batch ping
+        self._ping_task = asyncio.create_task(self._run_batch_ping(output_log, status))
+
+    async def _run_batch_ping(self, output_log: RichLog, status: Static) -> None:
+        """Run batch ping on all switches in parallel.
+
+        Args:
+            output_log: RichLog widget for output
+            status: Status widget for progress
+        """
+        try:
+            # Create ping tasks for all switches
+            tasks = [self._ping_single_switch(switch) for switch in self.switches]
+
+            # Run all pings in parallel
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            # Display results
+            for i, (switch, result) in enumerate(zip(self.switches, results)):
+                self.completed += 1
+                status.update(f"Completed {self.completed}/{self.total} pings")
+
+                # Format header
+                output_log.write(f"\n[bold cyan]>> {switch.name} ({switch.ip})[/bold cyan]")
+
+                # Display result
+                if isinstance(result, Exception):
+                    output_log.write(f"[red]✗ Error: {str(result)}[/red]")
+                elif result["success"]:
+                    output_log.write(f"[green]✓ {result['output']}[/green]")
+                else:
+                    output_log.write(f"[yellow]{result['output']}[/yellow]")
+
+            # Update final status
+            status.update(f"✓ Batch ping completed ({self.completed}/{self.total})")
+
+        except Exception as e:
+            output_log.write(f"\n[red]✗ Batch ping error: {str(e)}[/red]")
+            status.update("✗ Batch ping failed")
+
+    async def _ping_single_switch(self, switch) -> dict:
+        """Ping a single switch.
+
+        Args:
+            switch: Switch object to ping
+
+        Returns:
+            Dictionary with success flag and output/error message
+        """
+        try:
+            # Run ping command (1 packet for speed)
+            process = await asyncio.create_subprocess_exec(
+                "ping", "-c", "1", switch.ip,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.STDOUT
+            )
+
+            # Wait for completion with timeout
+            stdout, _ = await asyncio.wait_for(
+                process.communicate(),
+                timeout=5.0
+            )
+
+            output = stdout.decode('utf-8', errors='replace').strip()
+
+            # Check if ping was successful
+            success = process.returncode == 0
+
+            return {
+                "success": success,
+                "output": output if output else "No output"
+            }
+
+        except asyncio.TimeoutError:
+            return {
+                "success": False,
+                "output": "Timeout after 5 seconds"
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "output": f"Error: {str(e)}"
+            }
+
+    def on_key(self, event: events.Key) -> None:
+        """Handle key events - ESC closes modal and cancels pings.
+
+        Args:
+            event: Key event
+        """
+        if event.key == "escape":
+            # Cancel ping task if still running
+            if hasattr(self, '_ping_task') and not self._ping_task.done():
+                self._ping_task.cancel()
+
+            self.dismiss()
+            event.stop()
 
 
 class StreamingModal(BaseModal):

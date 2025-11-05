@@ -12,9 +12,10 @@ from switch_manager.manager import SwitchManager
 from switch_manager.models import SearchMode, CommandType, COMMANDS
 from switch_manager.widgets.command_bar import CommandBar
 from switch_manager.widgets.status_bar import StatusBar
-from switch_manager.screens.modals import DetailsModal, HelpModal, ConfirmationModal, StreamingModal, OutputModal
+from switch_manager.screens.modals import DetailsModal, HelpModal, ConfirmationModal, StreamingModal, OutputModal, BatchPingModal
 from switch_manager.utils.validation import validate_ip, validate_username
 from switch_manager.utils.terminal import spawn_ssh_terminal, get_platform_name
+from switch_manager.utils.tmux_handler import is_tmux_available, create_tmux_session, attach_to_session
 
 
 class MainScreen(Screen):
@@ -37,6 +38,7 @@ class MainScreen(Screen):
         self.manager = manager
         self.table_cursor_row = 0
         self.search_input_focused = False
+        self.selected_rows = set()  # Track selected row indices for batch operations
 
     def compose(self):
         """Build the UI layout."""
@@ -67,7 +69,7 @@ class MainScreen(Screen):
 
             # Keyboard shortcuts bar
             yield Static(
-                "F1-F5:Sort | 1-8:Cmd | ↑↓:Nav | ←→:Cmd | Enter:Exec | "
+                "F1-F5:Sort | 1-8:Cmd | ↑↓:Nav | Space:Select | ←→:Cmd | Enter:Exec | "
                 "Ctrl+L:Mode | ?:Help",
                 id="shortcuts"
             )
@@ -114,9 +116,12 @@ class MainScreen(Screen):
             switches = self.manager.all_switches
 
             if switches:
-                for switch in switches:
+                for idx, switch in enumerate(switches):
+                    is_selected = idx in self.selected_rows
+                    name_display = f"{'☑' if is_selected else '☐'} {switch.name}"
+
                     table.add_row(
-                        switch.name,
+                        name_display,
                         switch.ip,
                         switch.subnet,
                         switch.aliases,
@@ -206,10 +211,17 @@ class MainScreen(Screen):
         # Clear existing rows
         table.clear()
 
-        # Add rows
-        for switch in switches:
+        # Clear selection when table is refreshed (filtered switches changed)
+        self.selected_rows.clear()
+
+        # Add rows with selection indicators
+        for idx, switch in enumerate(switches):
+            # Add selection indicator to name
+            is_selected = idx in self.selected_rows
+            name_display = f"{'☑' if is_selected else '☐'} {switch.name}"
+
             table.add_row(
-                switch.name,
+                name_display,
                 switch.ip,
                 switch.subnet,
                 switch.aliases,
@@ -374,6 +386,12 @@ class MainScreen(Screen):
             event.stop()
             return
 
+        # Space: Toggle selection (when table has focus)
+        if event.key == "space" and not search_has_focus:
+            self.toggle_selection()
+            event.stop()
+            return
+
         # Auto-focus search on printable characters (if not already focused)
         if not search_has_focus and len(event.key) == 1 and event.key.isprintable():
             search_input.focus()
@@ -497,16 +515,16 @@ class MainScreen(Screen):
             await self.execute_ping_command()
         elif self.selected_command == CommandType.TRACEROUTE:
             await self.execute_traceroute_command()
+        elif self.selected_command == CommandType.BATCH_PING:
+            await self.execute_batch_ping_command()
+        elif self.selected_command == CommandType.TMUX:
+            await self.execute_tmux_command()
         elif self.selected_command == CommandType.DETAILS:
             await self.execute_details_command()
         elif self.selected_command == CommandType.HELP:
             await self.execute_help_command()
         elif self.selected_command == CommandType.EXIT:
             await self.execute_exit_command()
-        # Batch commands will be implemented in Phase 5
-        else:
-            status_bar = self.query_one(StatusBar)
-            status_bar.set_last_result("⚠ Coming in Phase 5!")
 
     async def execute_ssh_command(self) -> None:
         """Execute SSH command - open terminal to selected switch."""
@@ -616,6 +634,190 @@ class MainScreen(Screen):
         await self.app.push_screen(modal)
         status_bar.set_last_result(f"✓ Traceroute to {selected_switch.name}")
 
+    async def execute_batch_ping_command(self) -> None:
+        """Execute batch ping on selected switches (or all filtered if none selected)."""
+        status_bar = self.query_one(StatusBar)
+
+        # Get switches to ping - either selected or all filtered
+        switches_to_ping = self.get_selected_switches()
+
+        if not switches_to_ping:
+            # No switches selected, use all filtered switches
+            switches_to_ping = self.manager.filtered_switches
+
+        if not switches_to_ping:
+            # No switches at all
+            modal = OutputModal(
+                title="No Switches",
+                content="No switches available to ping.\n\n"
+                        "Please load switches or adjust your filter."
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ No switches to ping")
+            return
+
+        # Validate all IP addresses before showing confirmation
+        invalid_ips = []
+        for switch in switches_to_ping:
+            if not validate_ip(switch.ip):
+                invalid_ips.append(f"{switch.name} ({switch.ip})")
+
+        if invalid_ips:
+            modal = OutputModal(
+                title="Invalid IP Addresses",
+                content=f"The following switches have invalid IP addresses:\n\n"
+                        f"{chr(10).join(invalid_ips)}\n\n"
+                        f"Batch ping cannot proceed."
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ Invalid IPs")
+            return
+
+        # Show confirmation dialog
+        count = len(switches_to_ping)
+        selection_msg = f"{count} selected switch{'es' if count != 1 else ''}" if self.get_selected_switches() else f"all {count} filtered switch{'es' if count != 1 else ''}"
+
+        confirmation = ConfirmationModal(
+            title="Batch Ping Confirmation",
+            message=f"Ping {selection_msg}?",
+            warning=f"This will run {count} ping command{'s' if count != 1 else ''} in parallel"
+        )
+
+        # Use callback pattern instead of push_screen_wait to avoid worker context issues
+        def handle_confirmation(result):
+            if result:
+                # User confirmed - execute batch ping
+                async def run_ping():
+                    modal = BatchPingModal(switches_to_ping)
+                    await self.app.push_screen(modal)
+                    status_bar.set_last_result(f"✓ Batch ping completed ({count} switches)")
+
+                self.app.call_later(lambda: self.run_worker(run_ping))
+            else:
+                # User cancelled
+                status_bar.set_last_result("Batch ping cancelled")
+
+        await self.app.push_screen(confirmation, callback=handle_confirmation)
+
+    async def execute_tmux_command(self) -> None:
+        """Execute TMUX command - open synchronized session for selected switches."""
+        status_bar = self.query_one(StatusBar)
+
+        # Check if TMUX is available
+        if not is_tmux_available():
+            modal = OutputModal(
+                title="TMUX Not Available",
+                content="TMUX is not installed or not available on this system.\n\n"
+                        "Please install TMUX to use synchronized sessions:\n"
+                        "  macOS:   brew install tmux\n"
+                        "  Linux:   apt install tmux / yum install tmux\n"
+                        "  Windows: Use WSL with tmux installed"
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ TMUX not available")
+            return
+
+        # Validate username from config
+        if not self.config.sm_user:
+            modal = OutputModal(
+                title="Missing Username",
+                content="SM_USER environment variable is not set.\n\n"
+                        "Please set your SSH username:\n"
+                        "export SM_USER=your_username"
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ No username")
+            return
+
+        if not validate_username(self.config.sm_user):
+            modal = OutputModal(
+                title="Invalid Username",
+                content=f"The username '{self.config.sm_user}' contains invalid characters.\n\n"
+                        f"Username can only contain: letters, numbers, dots, dashes, underscores"
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ Invalid username")
+            return
+
+        # Get switches - either selected or all filtered
+        switches_for_tmux = self.get_selected_switches()
+
+        if not switches_for_tmux:
+            # No switches selected, use all filtered switches
+            switches_for_tmux = self.manager.filtered_switches
+
+        if not switches_for_tmux:
+            # No switches at all
+            modal = OutputModal(
+                title="No Switches",
+                content="No switches available for TMUX session.\n\n"
+                        "Please load switches or adjust your filter."
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ No switches for TMUX")
+            return
+
+        # Validate all IP addresses before showing confirmation
+        invalid_ips = []
+        for switch in switches_for_tmux:
+            if not validate_ip(switch.ip):
+                invalid_ips.append(f"{switch.name} ({switch.ip})")
+
+        if invalid_ips:
+            modal = OutputModal(
+                title="Invalid IP Addresses",
+                content=f"The following switches have invalid IP addresses:\n\n"
+                        f"{chr(10).join(invalid_ips)}\n\n"
+                        f"TMUX session cannot proceed."
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ Invalid IPs")
+            return
+
+        # Show confirmation dialog
+        count = len(switches_for_tmux)
+        selection_msg = f"{count} selected switch{'es' if count != 1 else ''}" if self.get_selected_switches() else f"all {count} filtered switch{'es' if count != 1 else ''}"
+
+        confirmation = ConfirmationModal(
+            title="TMUX Synchronized Session",
+            message=f"Launch TMUX session with {selection_msg}?",
+            warning=f"Synchronized panes: Commands typed will affect ALL {count} switches!\n"
+                    f"The application will exit after creating the TMUX session."
+        )
+
+        # Use callback pattern
+        def handle_confirmation(result):
+            if result:
+                # User confirmed - create TMUX session
+                success = create_tmux_session(
+                    switches_for_tmux,
+                    self.config.sm_user,
+                    "switch-manager"
+                )
+
+                if success:
+                    # Attach to the session - this will exit the app
+                    attach_to_session("switch-manager")
+                    # If we get here, attach failed
+                    status_bar.set_last_result("✗ Failed to attach to TMUX")
+                else:
+                    # Failed to create session
+                    async def show_error():
+                        modal = OutputModal(
+                            title="TMUX Session Failed",
+                            content="Failed to create TMUX session.\n\n"
+                                    "Please check that TMUX is installed correctly."
+                        )
+                        await self.app.push_screen(modal)
+                        status_bar.set_last_result("✗ TMUX session failed")
+
+                    self.app.call_later(lambda: self.run_worker(show_error))
+            else:
+                # User cancelled
+                status_bar.set_last_result("TMUX session cancelled")
+
+        await self.app.push_screen(confirmation, callback=handle_confirmation)
+
     async def execute_details_command(self) -> None:
         """Show details modal for selected switch."""
         selected_switch = self.get_selected_switch()
@@ -637,11 +839,14 @@ class MainScreen(Screen):
             message="Are you sure you want to quit?",
             warning=""
         )
-        result = await self.app.push_screen_wait(modal)
 
-        if result:
-            # User confirmed - exit
-            self.app.exit()
+        # Use callback pattern instead of push_screen_wait to avoid worker context issues
+        def handle_exit(result):
+            if result:
+                # User confirmed - exit
+                self.app.exit()
+
+        await self.app.push_screen(modal, callback=handle_exit)
 
     def get_selected_switch(self):
         """Get the currently selected switch.
@@ -656,3 +861,73 @@ class MainScreen(Screen):
             return self.manager.filtered_switches[self.table_cursor_row]
 
         return None
+
+    def get_selected_switches(self) -> list:
+        """Get all switches that have been selected (checked) for batch operations.
+
+        Returns:
+            List of Switch objects that are selected. Empty list if none selected.
+        """
+        if not self.selected_rows:
+            return []
+
+        filtered = self.manager.filtered_switches
+        return [filtered[idx] for idx in sorted(self.selected_rows) if idx < len(filtered)]
+
+    def toggle_selection(self) -> None:
+        """Toggle selection state of the currently highlighted row."""
+        table = self.query_one("#switch-table", DataTable)
+
+        if table.row_count == 0:
+            return
+
+        # Toggle selection for current row
+        if self.table_cursor_row in self.selected_rows:
+            self.selected_rows.remove(self.table_cursor_row)
+        else:
+            self.selected_rows.add(self.table_cursor_row)
+
+        # Refresh the table to update selection indicators
+        filtered = self.manager.filtered_switches
+        self.refresh_table_preserving_selection(filtered)
+
+        # Update status bar to show selection count
+        status_bar = self.query_one(StatusBar)
+        count = len(self.selected_rows)
+        if count > 0:
+            status_bar.set_last_result(f"✓ {count} switch{'es' if count != 1 else ''} selected")
+        else:
+            status_bar.set_last_result("")
+
+    def refresh_table_preserving_selection(self, switches) -> None:
+        """Refresh table without clearing selection.
+
+        Args:
+            switches: List of Switch objects to display
+        """
+        table = self.query_one("#switch-table", DataTable)
+        current_row = self.table_cursor_row
+
+        # Clear table
+        table.clear()
+
+        # Add rows with selection indicators
+        for idx, switch in enumerate(switches):
+            is_selected = idx in self.selected_rows
+            name_display = f"{'☑' if is_selected else '☐'} {switch.name}"
+
+            table.add_row(
+                name_display,
+                switch.ip,
+                switch.subnet,
+                switch.aliases,
+                switch.comment,
+                key=switch.name
+            )
+
+        # Restore cursor position
+        if table.row_count > 0 and current_row < table.row_count:
+            table.move_cursor(row=current_row)
+        elif table.row_count > 0:
+            table.move_cursor(row=0)
+            self.table_cursor_row = 0
