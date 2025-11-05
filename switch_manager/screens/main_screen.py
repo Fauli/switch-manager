@@ -9,7 +9,12 @@ from textual.reactive import reactive
 
 from switch_manager.config import Config
 from switch_manager.manager import SwitchManager
-from switch_manager.models import SearchMode
+from switch_manager.models import SearchMode, CommandType, COMMANDS
+from switch_manager.widgets.command_bar import CommandBar
+from switch_manager.widgets.status_bar import StatusBar
+from switch_manager.screens.modals import DetailsModal, HelpModal, ConfirmationModal, StreamingModal, OutputModal
+from switch_manager.utils.validation import validate_ip, validate_username
+from switch_manager.utils.terminal import spawn_ssh_terminal, get_platform_name
 
 
 class MainScreen(Screen):
@@ -18,6 +23,7 @@ class MainScreen(Screen):
     # Reactive properties
     search_text = reactive("")
     search_mode = reactive(SearchMode.OR)
+    selected_command = reactive(CommandType.SSH)
 
     def __init__(self, config: Config, manager: SwitchManager) -> None:
         """Initialize the main screen.
@@ -38,12 +44,8 @@ class MainScreen(Screen):
             # Title bar
             yield Static("V-Li: Switch Manager", id="title")
 
-            # Command bar
-            yield Static(
-                "NETWORK: (1)ssh (2)ping (3)traceroute (4)batch ping (5)tmux | "
-                "SYSTEM: (6)details (7)help (8)exit",
-                id="command-bar"
-            )
+            # Command bar (interactive widget)
+            yield CommandBar()
 
             # Search help bar
             yield Static(
@@ -70,8 +72,8 @@ class MainScreen(Screen):
                 id="shortcuts"
             )
 
-            # Status bar
-            yield Static("0 switches | ssh", id="status-bar")
+            # Status bar (interactive widget)
+            yield StatusBar()
 
     async def on_mount(self) -> None:
         """Initialize the screen after mounting."""
@@ -95,7 +97,7 @@ class MainScreen(Screen):
         """Load CSV data and populate the table."""
         result_counter = self.query_one("#result-counter", Static)
         table = self.query_one("#switch-table", DataTable)
-        status_bar = self.query_one("#status-bar", Static)
+        status_bar = self.query_one(StatusBar)
 
         try:
             # Show loading message
@@ -127,7 +129,8 @@ class MainScreen(Screen):
                 result_counter.update(f"Showing all {count} switches")
 
                 # Update status bar
-                status_bar.update(f"{count} switches | ssh")
+                status_bar.set_switch_count(count, count)
+                status_bar.set_active_command(CommandType.SSH)
 
                 # Move cursor to first row
                 if table.row_count > 0:
@@ -136,12 +139,14 @@ class MainScreen(Screen):
             else:
                 # No data loaded
                 result_counter.update("No switches found. Check CSV file.")
-                status_bar.update("0 switches | ssh")
+                status_bar.set_switch_count(0, 0)
+                status_bar.set_active_command(CommandType.SSH)
 
         except Exception as e:
             # Handle loading errors
             result_counter.update(f"Error loading CSV: {str(e)}")
-            status_bar.update("0 switches | error")
+            status_bar.set_switch_count(0, 0)
+            status_bar.set_last_result("✗ Error loading CSV")
 
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
         """Track the currently highlighted row."""
@@ -227,7 +232,7 @@ class MainScreen(Screen):
             search_text: Current search text
         """
         result_counter = self.query_one("#result-counter", Static)
-        status_bar = self.query_one("#status-bar", Static)
+        status_bar = self.query_one(StatusBar)
 
         total_count = len(self.manager.all_switches)
         filtered_count = len(filtered_switches)
@@ -245,9 +250,9 @@ class MainScreen(Screen):
             # Filtered but no search text
             result_counter.update(f"Showing {filtered_count} of {total_count} switches")
 
-        # Update status bar
-        sort_indicator = self.get_sort_indicator()
-        status_bar.update(f"{filtered_count}/{total_count} switches | ssh{sort_indicator}")
+        # Update status bar widget
+        status_bar.set_switch_count(filtered_count, total_count)
+        status_bar.set_sort_indicator(self.get_sort_indicator())
 
     def get_sort_indicator(self) -> str:
         """Get sort indicator string for status bar.
@@ -284,7 +289,7 @@ class MainScreen(Screen):
         if self.search_text:
             self.perform_search()
 
-    def on_key(self, event: events.Key) -> None:
+    async def on_key(self, event: events.Key) -> None:
         """Handle global keyboard shortcuts.
 
         Args:
@@ -338,6 +343,37 @@ class MainScreen(Screen):
             event.stop()
             return
 
+        # Command selection: 1-8 keys (when search doesn't have focus)
+        if not search_has_focus and event.key in "12345678":
+            command_num = int(event.key)
+            self.select_command_by_number(command_num)
+            event.stop()
+            return
+
+        # Command selection: ← and → arrows (when search doesn't have focus)
+        if not search_has_focus:
+            if event.key == "left":
+                self.select_previous_command()
+                event.stop()
+                return
+            elif event.key == "right":
+                self.select_next_command()
+                event.stop()
+                return
+
+        # Execute command: Enter key (when table has focus)
+        if event.key == "enter" and not search_has_focus:
+            await self.execute_selected_command()
+            event.stop()
+            return
+
+        # ? shortcut for help (when search doesn't have focus)
+        if event.key == "question_mark" and not search_has_focus:
+            self.selected_command = CommandType.HELP
+            await self.execute_selected_command()
+            event.stop()
+            return
+
         # Auto-focus search on printable characters (if not already focused)
         if not search_has_focus and len(event.key) == 1 and event.key.isprintable():
             search_input.focus()
@@ -360,9 +396,10 @@ class MainScreen(Screen):
                     self.table_cursor_row = new_row
                     event.stop()
 
-        # 'q' to quit
+        # 'q' to quit (when search doesn't have focus)
         if event.key == "q" and not search_has_focus:
-            self.app.exit()
+            await self.execute_exit_command()
+            event.stop()
 
     def sort_by_column(self, column: str) -> None:
         """Sort table by specified column.
@@ -408,6 +445,203 @@ class MainScreen(Screen):
 
             # Update column label
             table.columns[col_key].label = label
+
+    def select_command_by_number(self, number: int) -> None:
+        """Select a command by its number (1-8).
+
+        Args:
+            number: Command number
+        """
+        command_bar = self.query_one(CommandBar)
+        status_bar = self.query_one(StatusBar)
+
+        # Update selected command
+        self.selected_command = CommandType(number)
+        command_bar.select_command(self.selected_command)
+        status_bar.set_active_command(self.selected_command)
+
+    def select_next_command(self) -> None:
+        """Select the next command (wraps around)."""
+        command_bar = self.query_one(CommandBar)
+        status_bar = self.query_one(StatusBar)
+
+        command_bar.select_next()
+        self.selected_command = command_bar.selected_command
+        status_bar.set_active_command(self.selected_command)
+
+    def select_previous_command(self) -> None:
+        """Select the previous command (wraps around)."""
+        command_bar = self.query_one(CommandBar)
+        status_bar = self.query_one(StatusBar)
+
+        command_bar.select_previous()
+        self.selected_command = command_bar.selected_command
+        status_bar.set_active_command(self.selected_command)
+
+    async def execute_selected_command(self) -> None:
+        """Execute the currently selected command."""
+        # Get command metadata
+        cmd = next(c for c in COMMANDS if c.type == self.selected_command)
+
+        # Check if switch selection is required
+        if cmd.requires_selection:
+            selected_switch = self.get_selected_switch()
+            if not selected_switch:
+                # No switch selected - do nothing
+                return
+
+        # Execute based on command type
+        if self.selected_command == CommandType.SSH:
+            await self.execute_ssh_command()
+        elif self.selected_command == CommandType.PING:
+            await self.execute_ping_command()
+        elif self.selected_command == CommandType.TRACEROUTE:
+            await self.execute_traceroute_command()
+        elif self.selected_command == CommandType.DETAILS:
+            await self.execute_details_command()
+        elif self.selected_command == CommandType.HELP:
+            await self.execute_help_command()
+        elif self.selected_command == CommandType.EXIT:
+            await self.execute_exit_command()
+        # Batch commands will be implemented in Phase 5
+        else:
+            status_bar = self.query_one(StatusBar)
+            status_bar.set_last_result("⚠ Coming in Phase 5!")
+
+    async def execute_ssh_command(self) -> None:
+        """Execute SSH command - open terminal to selected switch."""
+        selected_switch = self.get_selected_switch()
+        if not selected_switch:
+            return
+
+        status_bar = self.query_one(StatusBar)
+
+        # Validate IP address
+        if not validate_ip(selected_switch.ip):
+            modal = OutputModal(
+                title="Invalid IP Address",
+                content=f"The IP address '{selected_switch.ip}' is not valid.\n\n"
+                        f"SSH connection cannot be established."
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ Invalid IP")
+            return
+
+        # Validate username from config
+        if not self.config.sm_user:
+            modal = OutputModal(
+                title="Missing Username",
+                content="SM_USER environment variable is not set.\n\n"
+                        "Please set your SSH username:\n"
+                        "export SM_USER=your_username"
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ No username")
+            return
+
+        if not validate_username(self.config.sm_user):
+            modal = OutputModal(
+                title="Invalid Username",
+                content=f"The username '{self.config.sm_user}' contains invalid characters.\n\n"
+                        f"Username can only contain: letters, numbers, dots, dashes, underscores"
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ Invalid username")
+            return
+
+        # Spawn SSH terminal
+        success = spawn_ssh_terminal(self.config.sm_user, selected_switch.ip)
+
+        if success:
+            status_bar.set_last_result(f"✓ SSH opened to {selected_switch.name}")
+        else:
+            platform = get_platform_name()
+            modal = OutputModal(
+                title="Terminal Not Available",
+                content=f"Could not open terminal on {platform}.\n\n"
+                        f"Please ensure you have a terminal emulator installed."
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ Terminal failed")
+
+    async def execute_ping_command(self) -> None:
+        """Execute ping command - show streaming output."""
+        selected_switch = self.get_selected_switch()
+        if not selected_switch:
+            return
+
+        status_bar = self.query_one(StatusBar)
+
+        # Validate IP address
+        if not validate_ip(selected_switch.ip):
+            modal = OutputModal(
+                title="Invalid IP Address",
+                content=f"The IP address '{selected_switch.ip}' is not valid."
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ Invalid IP")
+            return
+
+        # Create streaming modal
+        title = f"Ping: {selected_switch.name} ({selected_switch.ip})"
+        command = ["ping", "-c", "4", selected_switch.ip]
+
+        modal = StreamingModal(title, command)
+        await self.app.push_screen(modal)
+        status_bar.set_last_result(f"✓ Pinged {selected_switch.name}")
+
+    async def execute_traceroute_command(self) -> None:
+        """Execute traceroute command - show streaming output."""
+        selected_switch = self.get_selected_switch()
+        if not selected_switch:
+            return
+
+        status_bar = self.query_one(StatusBar)
+
+        # Validate IP address
+        if not validate_ip(selected_switch.ip):
+            modal = OutputModal(
+                title="Invalid IP Address",
+                content=f"The IP address '{selected_switch.ip}' is not valid."
+            )
+            await self.app.push_screen(modal)
+            status_bar.set_last_result("✗ Invalid IP")
+            return
+
+        # Create streaming modal
+        title = f"Traceroute: {selected_switch.name} ({selected_switch.ip})"
+        command = ["traceroute", selected_switch.ip]
+
+        modal = StreamingModal(title, command)
+        await self.app.push_screen(modal)
+        status_bar.set_last_result(f"✓ Traceroute to {selected_switch.name}")
+
+    async def execute_details_command(self) -> None:
+        """Show details modal for selected switch."""
+        selected_switch = self.get_selected_switch()
+        if not selected_switch:
+            return
+
+        modal = DetailsModal(selected_switch)
+        await self.app.push_screen(modal)
+
+    async def execute_help_command(self) -> None:
+        """Show help modal."""
+        modal = HelpModal()
+        await self.app.push_screen(modal)
+
+    async def execute_exit_command(self) -> None:
+        """Show exit confirmation and quit if confirmed."""
+        modal = ConfirmationModal(
+            title="Exit V-Li Switch Manager?",
+            message="Are you sure you want to quit?",
+            warning=""
+        )
+        result = await self.app.push_screen_wait(modal)
+
+        if result:
+            # User confirmed - exit
+            self.app.exit()
 
     def get_selected_switch(self):
         """Get the currently selected switch.

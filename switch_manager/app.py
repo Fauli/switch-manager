@@ -76,6 +76,24 @@ class SwitchManagerApp(App):
         color: $text;
         padding: 0 1;
     }
+
+    CommandBar {
+        height: auto;
+        background: $panel;
+    }
+
+    #command-bar-content {
+        padding: 0 1;
+    }
+
+    StatusBar {
+        height: auto;
+        background: $primary;
+    }
+
+    #status-bar-content {
+        padding: 0 1;
+    }
     """
 
     def __init__(self) -> None:
