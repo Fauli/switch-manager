@@ -22,7 +22,12 @@ def is_tmux_available() -> bool:
         return False
 
 
-def create_tmux_session(switches: List, username: str, session_name: str = "switch-manager") -> bool:
+def create_tmux_session(
+    switches: List,
+    username: str,
+    session_name: str = "switch-manager",
+    mode: str = "attach"
+) -> bool:
     """Create a TMUX session with synchronized panes for multiple switches.
 
     Creates a new TMUX session with one pane per switch, all synchronized.
@@ -32,6 +37,7 @@ def create_tmux_session(switches: List, username: str, session_name: str = "swit
         switches: List of Switch objects to connect to
         username: SSH username (must be pre-validated)
         session_name: Name for the TMUX session (default: "switch-manager")
+        mode: "attach" to attach immediately (exits app) or "detached" to keep running
 
     Returns:
         True if session was created successfully, False otherwise
@@ -40,6 +46,10 @@ def create_tmux_session(switches: List, username: str, session_name: str = "swit
         - username and switch IPs MUST be validated before calling
         - Uses argument lists to prevent command injection
         - Never uses shell=True
+
+    Mode behavior:
+        - "attach": Creates session and attaches (calls attach_to_session, exits app)
+        - "detached": Creates session in background (app keeps running)
     """
     if not switches:
         return False
@@ -100,7 +110,14 @@ def create_tmux_session(switches: List, username: str, session_name: str = "swit
             timeout=2
         )
 
-        return True
+        # Handle attach vs detached mode
+        if mode == "attach":
+            # Attach to session (this will exit the app)
+            attach_to_session(session_name)
+            return True
+        else:
+            # Detached mode - session created in background
+            return True
 
     except subprocess.TimeoutExpired:
         return False

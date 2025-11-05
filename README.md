@@ -6,6 +6,15 @@
     Master Your Network Magic!
 </p>
 
+<p align="center">
+    <a href="https://www.python.org/downloads/"><img alt="Python" src="https://img.shields.io/badge/python-3.11%2B-blue.svg"></a>
+   <img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg"></a>
+    <a href="https://textual.textualize.io/"><img alt="Textual" src="https://img.shields.io/badge/Made%20with-Textual-blueviolet.svg"></a>
+    <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+    <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg">
+    <img alt="Status" src="https://img.shields.io/badge/status-alpha-orange.svg">
+</p>
+
 ## Introduction
 
 V-Li Switch Manager is a **keyboard-first terminal user interface (TUI)** for managing network switches. Built with [Textual](https://textual.textualize.io/), it provides network administrators with fast, efficient access to common network operations - all without leaving your terminal.
@@ -121,6 +130,12 @@ export SM_DELIMITER=";"
 # Examples:
 #   export SM_DELIMITER=","  # For comma-separated files
 #   export SM_DELIMITER="\t" # For tab-separated files
+
+# OPTIONAL: TMUX behavior mode (default: attach)
+export SM_TMUX_MODE="attach"
+# Options:
+#   "attach"   - Create TMUX session and attach immediately (V-Li exits)
+#   "detached" - Create TMUX session in background (V-Li keeps running)
 
 # OPTIONAL: Enable debug logging (default: false)
 export SM_DEBUG="false"
@@ -337,32 +352,63 @@ Creates a **TMUX session with synchronized panes** for controlling multiple swit
 - **Requirements**: TMUX must be installed (`tmux --version`)
 - **Layout**: Tiled layout with one pane per switch
 - **Synchronization**: All panes synchronized (type once, executes on all)
-- **Session name**: `vli_switches`
-- **Behavior**: V-Li app **exits** and **attaches to TMUX session**
+- **Session name**: `switch-manager`
 - **Security**: Strong warning shown, requires explicit confirmation
 
-**⚠️ Important:**
-- TMUX takes over your terminal completely
-- V-Li app exits after launching TMUX
-- To return to V-Li: Detach from TMUX (`Ctrl+B`, then `D`), then relaunch app
-- TMUX session continues running in background after detaching
+**🎛️ Two Modes (Controlled by `SM_TMUX_MODE`):**
 
-**Example workflow:**
-1. Filter: `"core"` → 4 core switches
-2. Press `5` → "Open TMUX with 4 switches? (WARNING: Commands execute on ALL)"
-3. Press `y` → TMUX session created
-4. Type: `show version` → Runs on all 4 switches simultaneously
-5. Press `Ctrl+B`, then `D` → Detach from TMUX
-6. Run: `python -m switch_manager` → Return to V-Li
-
-**To reconnect to existing TMUX session:**
+#### Mode 1: Attach (Default)
 ```bash
-tmux attach -t vli_switches
+export SM_TMUX_MODE="attach"
 ```
+- V-Li **exits** and **attaches to TMUX session immediately**
+- TMUX takes over your terminal completely
+- Use this when you want to work in TMUX right away
+- To return to V-Li: Detach (`Ctrl+B`, then `D`), then relaunch V-Li
 
-**To kill TMUX session:**
+**Workflow:**
+1. Filter: `"core"` → 4 core switches
+2. Press `5` → Confirmation dialog
+3. Press `y` → V-Li exits, TMUX session opens
+4. Type commands → Executes on all 4 switches simultaneously
+5. Press `Ctrl+B`, then `D` → Detach from TMUX
+6. Run: `python -m switch_manager` → Restart V-Li
+
+#### Mode 2: Detached
 ```bash
-tmux kill-session -t vli_switches
+export SM_TMUX_MODE="detached"
+```
+- TMUX session created **in background**
+- V-Li **keeps running** - you can continue using it
+- Use this when you want to prep the session and attach later
+- Attach manually when ready: `tmux attach -t switch-manager`
+
+**Workflow:**
+1. Filter: `"core"` → 4 core switches
+2. Press `5` → Confirmation dialog
+3. Press `y` → Session created in background
+4. Continue using V-Li (search, view details, etc.)
+5. When ready, open new terminal: `tmux attach -t switch-manager`
+6. Work in TMUX, V-Li still running in original terminal
+
+**⚠️ Important for Both Modes:**
+- Commands typed execute on **ALL switches** simultaneously
+- TMUX session continues running after detaching
+- You can re-attach anytime from any terminal
+
+**Common TMUX Commands:**
+```bash
+# Attach to existing session
+tmux attach -t switch-manager
+
+# Detach from session (keeps running)
+Ctrl+B, then D
+
+# Kill session completely
+tmux kill-session -t switch-manager
+
+# List all sessions
+tmux list-sessions
 ```
 
 ### Command 6: Details
@@ -462,7 +508,7 @@ Ctrl+B, then D
 Ctrl+B, then type: :kill-session
 
 # Or from outside TMUX
-tmux kill-session -t vli_switches
+tmux kill-session -t switch-manager
 ```
 
 #### App crashes on startup
@@ -520,10 +566,21 @@ A: Not in the MVP. Keyboard shortcut customization is planned for a future relea
 ### Features
 
 **Q: How do I return to V-Li after opening a TMUX session?**
-A: Press `Ctrl+B`, then `D` to detach from TMUX. The session keeps running in the background. Relaunch V-Li with `python -m switch_manager`.
+A: It depends on your `SM_TMUX_MODE` setting:
+
+- **Attach mode (default)**: V-Li exits when TMUX opens. To return: Press `Ctrl+B`, then `D` to detach from TMUX, then relaunch V-Li with `python -m switch_manager`.
+
+- **Detached mode**: V-Li never exits! The TMUX session is created in the background. V-Li keeps running in your original terminal. You can attach to TMUX from a different terminal window.
 
 **Q: Can I re-attach to a TMUX session after detaching?**
-A: Yes! Use: `tmux attach -t vli_switches`
+A: Yes! Use: `tmux attach -t switch-manager`
+
+**Q: Which TMUX mode should I use?**
+A:
+- **Use "attach" mode** if you want to work in TMUX immediately and don't need V-Li open
+- **Use "detached" mode** if you want to keep V-Li open for reference (IP addresses, switch names) while working in TMUX in another terminal
+
+Set your preference: `export SM_TMUX_MODE="detached"` (add to `~/.bashrc` to persist)
 
 **Q: What's the difference between OR and AND search modes?**
 A:
@@ -589,12 +646,13 @@ A: The first 5 columns (Name, IP, subnet, aliases, comment) are used by V-Li. Ad
 
 4. **AND Mode for Precision**: Need switches that are both "prod" AND in "rum" subnet? Type "prod rum" and press `Ctrl+L` to toggle AND mode.
 
-5. **TMUX for Emergency Updates**: Filter to affected switches, use Command 5 to open synchronized TMUX, execute fix commands once - applied to all simultaneously.
+5. **TMUX for Emergency Updates**: Filter to affected switches, use Command 5 to open synchronized TMUX, execute fix commands once - applied to all simultaneously. Tip: Use detached mode (`SM_TMUX_MODE="detached"`) to keep V-Li open for reference!
 
 6. **Persistent Environment Variables**: Add to `~/.bashrc` or `~/.zshrc`:
    ```bash
    export SM_USER="your_username"
    export SM_CSV_DATA="/path/to/your/switches.csv"
+   export SM_TMUX_MODE="detached"  # Keep V-Li running when using TMUX
    ```
 
 7. **Multiple SSH Sessions**: Command 1 keeps the app running - open SSH to multiple switches and keep V-Li available for reference.

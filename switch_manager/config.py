@@ -17,11 +17,13 @@ class Config:
         sm_csv_data: Path to CSV data file
         sm_delimiter: CSV delimiter character
         sm_debug: Enable debug logging
+        sm_tmux_mode: TMUX behavior mode (attach or detached)
     """
     sm_user: Optional[str]
     sm_csv_data: str
     sm_delimiter: str
     sm_debug: bool
+    sm_tmux_mode: str
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -32,6 +34,7 @@ class Config:
             SM_CSV_DATA: Path to CSV file (default: data.csv)
             SM_DELIMITER: CSV delimiter (default: ;)
             SM_DEBUG: Enable debug logging (default: false)
+            SM_TMUX_MODE: TMUX behavior - "attach" or "detached" (default: attach)
 
         Returns:
             Config instance with loaded values
@@ -39,17 +42,27 @@ class Config:
         Note:
             SM_USER is optional at startup but will cause an error when
             attempting SSH or TMUX commands if not set.
+
+            SM_TMUX_MODE options:
+                - "attach": Create TMUX session and attach (exits V-Li)
+                - "detached": Create TMUX session in background (V-Li keeps running)
         """
         sm_user = os.getenv("SM_USER")
         sm_csv_data = os.getenv("SM_CSV_DATA", "data.csv")
         sm_delimiter = os.getenv("SM_DELIMITER", ";")
         sm_debug = os.getenv("SM_DEBUG", "false").lower() in ("true", "1", "yes")
+        sm_tmux_mode = os.getenv("SM_TMUX_MODE", "attach").lower()
+
+        # Validate tmux mode
+        if sm_tmux_mode not in ("attach", "detached"):
+            sm_tmux_mode = "attach"
 
         return cls(
             sm_user=sm_user,
             sm_csv_data=sm_csv_data,
             sm_delimiter=sm_delimiter,
             sm_debug=sm_debug,
+            sm_tmux_mode=sm_tmux_mode,
         )
 
     def validate_for_ssh(self) -> None:
@@ -71,5 +84,6 @@ class Config:
             f"sm_user={'***' if self.sm_user else None}, "
             f"sm_csv_data={self.sm_csv_data!r}, "
             f"sm_delimiter={self.sm_delimiter!r}, "
-            f"sm_debug={self.sm_debug})"
+            f"sm_debug={self.sm_debug}, "
+            f"sm_tmux_mode={self.sm_tmux_mode!r})"
         )

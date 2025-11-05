@@ -778,11 +778,18 @@ class MainScreen(Screen):
         count = len(switches_for_tmux)
         selection_msg = f"{count} selected switch{'es' if count != 1 else ''}" if self.get_selected_switches() else f"all {count} filtered switch{'es' if count != 1 else ''}"
 
+        # Determine warning message based on mode
+        tmux_mode = self.config.sm_tmux_mode
+        if tmux_mode == "attach":
+            mode_warning = "The application will exit after creating the TMUX session."
+        else:
+            mode_warning = "Session created in background. Use 'tmux attach -t switch-manager' to connect."
+
         confirmation = ConfirmationModal(
             title="TMUX Synchronized Session",
             message=f"Launch TMUX session with {selection_msg}?",
             warning=f"Synchronized panes: Commands typed will affect ALL {count} switches!\n"
-                    f"The application will exit after creating the TMUX session."
+                    f"{mode_warning}"
         )
 
         # Use callback pattern
@@ -792,14 +799,19 @@ class MainScreen(Screen):
                 success = create_tmux_session(
                     switches_for_tmux,
                     self.config.sm_user,
-                    "switch-manager"
+                    "switch-manager",
+                    mode=tmux_mode
                 )
 
                 if success:
-                    # Attach to the session - this will exit the app
-                    attach_to_session("switch-manager")
-                    # If we get here, attach failed
-                    status_bar.set_last_result("✗ Failed to attach to TMUX")
+                    # Success message depends on mode
+                    if tmux_mode == "attach":
+                        # In attach mode, we should never reach here (app exits)
+                        # But if we do, it means attach failed
+                        status_bar.set_last_result("✗ Failed to attach to TMUX")
+                    else:
+                        # Detached mode - show success message
+                        status_bar.set_last_result("✓ TMUX session 'switch-manager' created (detached)")
                 else:
                     # Failed to create session
                     async def show_error():
